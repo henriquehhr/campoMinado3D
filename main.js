@@ -7,7 +7,7 @@ const cubeSize = 0.5;
 const cubeCount = 3;
 
 // Espaço vazio entre os cubos
-const spacing = 0.1;
+const spacing = 0.15;
 
 // Crie uma cena
 const scene = new THREE.Scene();
@@ -18,7 +18,8 @@ camera.position.z = 5;
 camera.updateProjectionMatrix();
 
 // Crie um renderizador
-const renderer = new THREE.WebGLRenderer();
+const antialias = { antialias: false }
+const renderer = new THREE.WebGLRenderer(antialias);
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
