@@ -2,12 +2,20 @@ import * as THREE from 'three';
 //import { OrbitControls } from './OrbitControls';
 import { TrackballControls } from 'three/addons/controls/TrackballControls.js';
 
+// Tamanho e quantidade de cubos menores
+const cubeSize = 0.5;
+const cubeCount = 5;
+
+// Espaço vazio entre os cubos
+const spacing = 0.1;
+
 // Crie uma cena
 const scene = new THREE.Scene();
 
 // Crie uma câmera
 const camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 1000);
 camera.position.z = 5;
+camera.updateProjectionMatrix();
 
 // Crie um renderizador
 const renderer = new THREE.WebGLRenderer();
@@ -21,12 +29,6 @@ controls.rotateSpeed = 4;
 // Crie um grupo para os cubos menores
 const cubeGroup = new THREE.Group();
 
-// Tamanho e quantidade de cubos menores
-const cubeSize = 0.5;
-const cubeCount = 4;
-
-// Espaço vazio entre os cubos
-const spacing = 0.1;
 
 // Crie os cubos menores e adicione-os ao grupo
 for (let i = 0; i < cubeCount; i++) {
@@ -42,9 +44,9 @@ for (let i = 0; i < cubeCount; i++) {
       const edgesMesh = new THREE.LineSegments(edges, edgeMaterial);
 
       // Posicione o cubo e suas arestas
-      const positionX = (i - cubeCount / 2) * (cubeSize + spacing);
-      const positionY = (j - cubeCount / 2) * (cubeSize + spacing);
-      const positionZ = (k - cubeCount / 2) * (cubeSize + spacing);
+      const positionX = (i - cubeCount / 2) * (cubeSize + spacing) + (cubeSize + spacing) / 2;
+      const positionY = (j - cubeCount / 2) * (cubeSize + spacing) + (cubeSize + spacing) / 2;
+      const positionZ = (k - cubeCount / 2) * (cubeSize + spacing) + (cubeSize + spacing) / 2;
       cube.position.set(positionX, positionY, positionZ);
       edgesMesh.position.set(positionX, positionY, positionZ);
 
@@ -74,13 +76,11 @@ window.addEventListener('mouseup', event => {
   clickMouse.y = - (event.clientY / window.innerHeight) * 2 + 1;
   raycaster.setFromCamera(clickMouse, camera);
   const intersects = raycaster.intersectObjects(scene.children);
-  if (intersects.length == 0) return;
-  let i = 1;
-  while (i + 1 <= intersects.length && !(intersects[i].object instanceof THREE.Mesh))
-    i++;
+  const cube = intersects.find(shape => shape.object instanceof THREE.Mesh);
+  if (!cube) return;
   //const randomColor = Math.random() * 0xffffff;
   //intersects[i]?.object.material.color.setHex(randomColor);
-  reduceCube(intersects[i]?.object)
+  reduceCube(cube.object)
 });
 
 function reduceCube(cube) {
