@@ -4,7 +4,7 @@ import { TrackballControls } from 'three/addons/controls/TrackballControls.js';
 
 // Tamanho e quantidade de cubos menores
 const cubeSize = 0.5;
-const cubeCount = 5;
+const cubeCount = 3;
 
 // Espaço vazio entre os cubos
 const spacing = 0.1;
@@ -76,11 +76,12 @@ window.addEventListener('mouseup', event => {
   clickMouse.y = - (event.clientY / window.innerHeight) * 2 + 1;
   raycaster.setFromCamera(clickMouse, camera);
   const intersects = raycaster.intersectObjects(scene.children);
-  const cube = intersects.find(shape => shape.object instanceof THREE.Mesh);
+  const { object: cube } = intersects.find(shape => shape.object instanceof THREE.Mesh) ?? { object: null };
   if (!cube) return;
+  if (cube.scale.x !== 1) return;
   //const randomColor = Math.random() * 0xffffff;
-  //intersects[i]?.object.material.color.setHex(randomColor);
-  reduceCube(cube.object)
+  //cube.material.color.setHex(randomColor);
+  reduceCube(cube)
 });
 
 function reduceCube(cube) {
