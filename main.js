@@ -58,9 +58,18 @@ for (let i = 0; i < cubeCount; i++) {
 // Adicione o grupo de cubos à cena
 scene.add(cubeGroup);
 
+let isDragging = false;
+window.addEventListener('mousedown', () => isDragging = false);
+window.addEventListener('mousemove', () => isDragging = true);
+
+
 const raycaster = new THREE.Raycaster();
 const clickMouse = new THREE.Vector2();
-window.addEventListener('click', event => {
+window.addEventListener('mouseup', event => {
+  if (isDragging) {
+    isDragging = false;
+    return;
+  }
   clickMouse.x = (event.clientX / window.innerWidth) * 2 - 1;
   clickMouse.y = - (event.clientY / window.innerHeight) * 2 + 1;
   raycaster.setFromCamera(clickMouse, camera);
@@ -89,7 +98,6 @@ function reduceCube(cube) {
     if (currentTime > duration) {
       clearInterval(timer);
       cubeGroup.remove(cube);
-      console.log("cubo removido")
     } else {
       const t = currentTime / duration;
       cube.scale.lerpVectors(initialScale, targetScale, t);
