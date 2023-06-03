@@ -1,3 +1,4 @@
+import { Position } from "./types";
 import { random } from "./utils";
 
 export default class MineSweeper3D {
@@ -6,8 +7,8 @@ export default class MineSweeper3D {
   z: number;
   numberOfMines: number;
   fields: Array<any>;
-  mineFields: Array<any>;
-  adjacentFields: Array<any>;
+  mineFields: Array<Position>;
+  adjacentFields: Array<Position>;
 
   constructor(x: number, y: number, z: number, numberOfMines: number) {
     this.x = x;
@@ -19,14 +20,13 @@ export default class MineSweeper3D {
     this.mineFields = [];
     this.adjacentFields = [];
 
-    this.initializrFields();
+    this.initializeFields();
     this.randomizeMines();
     this.calculateAdjacentFieldPositions();
     this.calculateNumberOfAdjacentMinesPerField();
-    console.log(this.mineFields);
   }
 
-  initializrFields() {
+  initializeFields() {
     for (let i = 0; i < this.x; i++) {
       const line: Array<any> = [];
       this.fields.push(line);
@@ -41,8 +41,8 @@ export default class MineSweeper3D {
   }
 
   randomizeMines() {
-    let temp: any;
-    let mineAlreadyExistsInThisPosition;
+    let temp: Position;
+    let mineAlreadyExistsInThisPosition: boolean;
     for (let i = 0; i < this.numberOfMines; i++) {
       do {
         temp = {

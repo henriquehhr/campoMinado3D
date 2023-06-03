@@ -65,7 +65,7 @@ fontLoader.load('assets/helvetiker_regular.typeface.json', (font) => {
   // Crie um grupo para os cubos menores
   const cubeGroup = new THREE.Group();
 
-  const texts: THREE.Mesh<TextGeometry, THREE.MeshBasicMaterial>[] = [];
+  const texts: THREE.Mesh<TextGeometry>[] = [];
   // Crie os cubos menores e adicione-os ao grupo
   for (let i = 0; i < cubeCount; i++) {
     for (let j = 0; j < cubeCount; j++) {
@@ -86,7 +86,7 @@ fontLoader.load('assets/helvetiker_regular.typeface.json', (font) => {
         const numberOfAdjacentMines = mineSweeper.fields[i][j][k];
         const isMine = mineSweeper.mineFields.some(mine => mine.x == i && mine.y == j && mine.z == k);
         if (numberOfAdjacentMines > 0 || isMine) {
-          let textMesh;
+          let textMesh: THREE.Mesh<TextGeometry>;
           if (!isMine) {
             textMesh = createTextObject('' + numberOfAdjacentMines, new THREE.Vector3(positionX, positionY, positionZ), numberColor[numberOfAdjacentMines]);
             texts.push(textMesh);
