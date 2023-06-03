@@ -19,7 +19,7 @@ const numberColor = {
 };
 
 const fontLoader = new FontLoader();
-fontLoader.load('helvetiker_regular.typeface.json', (font) => {
+fontLoader.load('assets/helvetiker_regular.typeface.json', (font) => {
 
   // Crie uma função para criar um objeto de texto
   function createTextObject(text, position, color) {
