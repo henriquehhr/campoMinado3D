@@ -1,7 +1,15 @@
-import { random } from './utils.js';
+import { random } from "./utils";
 
 export default class MineSweeper3D {
-  constructor(x, y, z, numberOfMines) {
+  x: number;
+  y: number;
+  z: number;
+  numberOfMines: number;
+  fields: Array<any>;
+  mineFields: Array<any>;
+  adjacentFields: Array<any>;
+
+  constructor(x: number, y: number, z: number, numberOfMines: number) {
     this.x = x;
     this.y = y;
     this.z = z;
@@ -9,7 +17,7 @@ export default class MineSweeper3D {
 
     this.fields = [];
     this.mineFields = [];
-    this.adjacentFilds = [];
+    this.adjacentFields = [];
 
     this.initializrFields();
     this.randomizeMines();
@@ -20,10 +28,10 @@ export default class MineSweeper3D {
 
   initializrFields() {
     for (let i = 0; i < this.x; i++) {
-      const line = [];
+      const line: Array<any> = [];
       this.fields.push(line);
       for (let j = 0; j < this.y; j++) {
-        const column = [];
+        const column: Array<any> = [];
         this.fields[i].push(column);
         for (let k = 0; k < this.z; k++) {
           this.fields[i][j].push(0);
@@ -33,7 +41,7 @@ export default class MineSweeper3D {
   }
 
   randomizeMines() {
-    let temp;
+    let temp: any;
     let mineAlreadyExistsInThisPosition;
     for (let i = 0; i < this.numberOfMines; i++) {
       do {
@@ -53,19 +61,19 @@ export default class MineSweeper3D {
       for (let j = -1; j <= 1; j++) {
         for (let k = -1; k <= 1; k++) {
           const position = { x: i, y: j, z: k };
-          this.adjacentFilds.push(position);
+          this.adjacentFields.push(position);
         }
       }
     }
     const innerFieldArrayPosition = 13;
-    this.adjacentFilds.splice(innerFieldArrayPosition, 1);
+    this.adjacentFields.splice(innerFieldArrayPosition, 1);
   }
 
   calculateNumberOfAdjacentMinesPerField() {
     for (let i = 0; i < this.numberOfMines; i++) {
       let mine = this.mineFields[i];
-      for (let j = 0; j < this.adjacentFilds.length; j++) {
-        let adjacent = this.adjacentFilds[j];
+      for (let j = 0; j < this.adjacentFields.length; j++) {
+        let adjacent = this.adjacentFields[j];
         if (this.fields[mine.x + adjacent.x] === undefined) continue;
         if (this.fields[mine.x + adjacent.x][mine.y + adjacent.y] === undefined) continue;
         if (this.fields[mine.x + adjacent.x][mine.y + adjacent.y][mine.z + adjacent.z] === undefined)

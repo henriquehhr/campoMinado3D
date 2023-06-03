@@ -1,4 +1,4 @@
-import MineSweeper3D from './MineSweeper3D';
+import MineSweeper3D from './MineSweeper3D.js';
 
 import * as THREE from 'three';
 import { TrackballControls } from 'three/addons/controls/TrackballControls.js';
@@ -7,22 +7,23 @@ import { FontLoader } from 'three/examples/jsm/loaders/FontLoader.js';
 
 const mineSweeper = new MineSweeper3D(6, 6, 6, 5);
 
-const numberColor = {
-  1: 0x1E69FF,
-  2: 0x278201,
-  3: 0xFE3500,
-  4: 0x0B3384,
-  5: 0x851700,
-  6: 0x068284,
-  7: 0x853984,
-  8: 0x757575
-};
+const numberColor = [
+  0,
+  0x1E69FF,
+  0x278201,
+  0xFE3500,
+  0x0B3384,
+  0x851700,
+  0x068284,
+  0x853984,
+  0x757575
+];
 
 const fontLoader = new FontLoader();
 fontLoader.load('assets/helvetiker_regular.typeface.json', (font) => {
 
   // Crie uma função para criar um objeto de texto
-  function createTextObject(text, position, color) {
+  function createTextObject(text: string, position: THREE.Vector3, color: number) {
     const textMaterial = new THREE.MeshBasicMaterial({ color: color });
     const textGeometry = new TextGeometry(text, {
       font: font,
@@ -64,7 +65,7 @@ fontLoader.load('assets/helvetiker_regular.typeface.json', (font) => {
   // Crie um grupo para os cubos menores
   const cubeGroup = new THREE.Group();
 
-  const texts = [];
+  const texts: THREE.Mesh<TextGeometry, THREE.MeshBasicMaterial>[] = [];
   // Crie os cubos menores e adicione-os ao grupo
   for (let i = 0; i < cubeCount; i++) {
     for (let j = 0; j < cubeCount; j++) {
@@ -82,12 +83,12 @@ fontLoader.load('assets/helvetiker_regular.typeface.json', (font) => {
         const positionY = (j - cubeCount / 2) * (cubeSize + spacing) + (cubeSize + spacing) / 2;
         const positionZ = (k - cubeCount / 2) * (cubeSize + spacing) + (cubeSize + spacing) / 2;
 
-        const numberOfAdjacentMines = '' + mineSweeper.fields[i][j][k];
+        const numberOfAdjacentMines = mineSweeper.fields[i][j][k];
         const isMine = mineSweeper.mineFields.some(mine => mine.x == i && mine.y == j && mine.z == k);
         if (numberOfAdjacentMines > 0 || isMine) {
           let textMesh;
           if (!isMine) {
-            textMesh = createTextObject(numberOfAdjacentMines, new THREE.Vector3(positionX, positionY, positionZ), numberColor[numberOfAdjacentMines]);
+            textMesh = createTextObject('' + numberOfAdjacentMines, new THREE.Vector3(positionX, positionY, positionZ), numberColor[numberOfAdjacentMines]);
             texts.push(textMesh);
             cubeGroup.add(textMesh);
           }
@@ -123,15 +124,17 @@ fontLoader.load('assets/helvetiker_regular.typeface.json', (font) => {
     clickMouse.y = - (event.clientY / window.innerHeight) * 2 + 1;
     raycaster.setFromCamera(clickMouse, camera);
     const intersects = raycaster.intersectObjects(scene.children);
-    const { object: cube } = intersects.find(shape => shape.object.geometry instanceof THREE.BoxGeometry) ?? { object: null };
+    let cube: THREE.Object3D | null = intersects[0].object;
+    //const { object: cube } = intersects.find(shape => shape.object.geometry instanceof THREE.BoxGeometry) ?? { object: null };
     if (!cube) return;
     if (cube.scale.x !== 1) return;
     //const randomColor = Math.random() * 0xffffff;
     //cube.material.color.setHex(randomColor);
-    reduceCube(cube)
+    //reduceCube(cube)
   });
 
-  function reduceCube(cube) {
+  /*
+  function reduceCube(cube: THREE.Object3D) {
     if (!cube) return;
     const initialScale = cube.scale.clone();
     const targetScale = new THREE.Vector3(0, 0, 0);
@@ -152,7 +155,7 @@ fontLoader.load('assets/helvetiker_regular.typeface.json', (font) => {
       }
     }, interval);
   }
-
+*/
   // Função de renderização
   function animate() {
     requestAnimationFrame(animate);
