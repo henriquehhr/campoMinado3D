@@ -1,24 +1,17 @@
-import { Position } from "./types";
+import { Field, Position, GameOver, FieldStatus } from "./types";
 import { random } from "./utils";
 
 export default class MineSweeper3D {
-  x: number;
-  y: number;
-  z: number;
-  numberOfMines: number;
-  fields: Array<any>;
-  mineFields: Array<Position>;
-  adjacentFields: Array<Position>;
+  fields: Field[][][];
+  mineFields: Position[];
+  adjacentFields: Position[];
+  coveredSafeFields: number;
 
-  constructor(x: number, y: number, z: number, numberOfMines: number) {
-    this.x = x;
-    this.y = y;
-    this.z = z;
-    this.numberOfMines = numberOfMines;
-
+  constructor(public readonly x: number, public readonly y: number, public readonly z: number, public readonly numberOfMines: number) {
     this.fields = [];
     this.mineFields = [];
     this.adjacentFields = [];
+    this.coveredSafeFields = (x * y * z) - numberOfMines;
 
     this.initializeFields();
     this.randomizeMines();
@@ -26,7 +19,7 @@ export default class MineSweeper3D {
     this.calculateNumberOfAdjacentMinesPerField();
   }
 
-  initializeFields() {
+  private initializeFields() {
     for (let i = 0; i < this.x; i++) {
       const line: Array<any> = [];
       this.fields.push(line);
@@ -34,13 +27,14 @@ export default class MineSweeper3D {
         const column: Array<any> = [];
         this.fields[i].push(column);
         for (let k = 0; k < this.z; k++) {
-          this.fields[i][j].push(0);
+          const field: Field = { status: 'covered', mine: false, adjacentMines: 0 };
+          this.fields[i][j].push(field);
         }
       }
     }
   }
 
-  randomizeMines() {
+  private randomizeMines() {
     let temp: Position;
     let mineAlreadyExistsInThisPosition: boolean;
     for (let i = 0; i < this.numberOfMines; i++) {
@@ -50,13 +44,14 @@ export default class MineSweeper3D {
           y: random(0, this.y - 1),
           z: random(0, this.z - 1),
         };
-        mineAlreadyExistsInThisPosition = this.mineFields.some(mine => mine.x == temp.x && mine.y == temp.y && mine.z == temp.z);
+        mineAlreadyExistsInThisPosition = this.fields[temp.x][temp.y][temp.z].mine;
       } while (mineAlreadyExistsInThisPosition);
       this.mineFields.push(temp);
+      this.fields[temp.x][temp.y][temp.z].mine = true;
     }
   }
 
-  calculateAdjacentFieldPositions() {
+  private calculateAdjacentFieldPositions() {
     for (let i = -1; i <= 1; i++) {
       for (let j = -1; j <= 1; j++) {
         for (let k = -1; k <= 1; k++) {
@@ -69,15 +64,82 @@ export default class MineSweeper3D {
     this.adjacentFields.splice(innerFieldArrayPosition, 1);
   }
 
-  calculateNumberOfAdjacentMinesPerField() {
+  private calculateNumberOfAdjacentMinesPerField() {
+    let x, y, z;
     this.mineFields.forEach(mine => {
       this.adjacentFields.forEach(adjacent => {
-        if (this.fields[mine.x + adjacent.x] === undefined) return;
-        if (this.fields[mine.x + adjacent.x][mine.y + adjacent.y] === undefined) return;
-        if (this.fields[mine.x + adjacent.x][mine.y + adjacent.y][mine.z + adjacent.z] === undefined)
-          return;
-        this.fields[mine.x + adjacent.x][mine.y + adjacent.y][mine.z + adjacent.z]++;
+        x = mine.x + adjacent.x;
+        y = mine.y + adjacent.y;
+        z = mine.z + adjacent.z;
+        if (this.fields[x] === undefined) return;
+        if (this.fields[x][y] === undefined) return;
+        if (this.fields[x][y][z] === undefined) return;
+        this.fields[x][y][z].adjacentMines++;
       });
     });
   }
+
+  public flagAField(p: Position): FieldStatus {
+    const status = this.fields[p.x][p.y][p.z].status;
+    if (status == 'uncovered') return 'uncovered';
+    this.fields[p.x][p.y][p.z].status = status == 'covered' ? 'flagged' : 'covered';
+    return this.fields[p.x][p.y][p.z].status;
+  }
+
+  public uncoverField(p: Position): GameOver | Field | Field[] | undefined {
+    const field = this.fields[p.x][p.y][p.z];
+    if (field.status == 'flagged' || field.status == 'uncovered') return;
+    if (field.mine)
+      return { message: 'You lose', mineFields: this.mineFields };
+    this.coveredSafeFields--;
+    if (this.coveredSafeFields === 0)
+      return { message: 'You win', mineFields: this.mineFields };
+    if (field.adjacentMines === 0) {
+      return this.uncoverAdjacentFields(p);
+    }
+    return field;
+  }
+
+  private uncoverAdjacentFields(p: Position,): GameOver | Field[] | undefined {
+    const uncoveredFields: Field[] = [];
+    let x, y, z;
+    for (const adjacent of this.adjacentFields) {
+      x = p.x + adjacent.x;
+      y = p.y + adjacent.y;
+      z = p.z + adjacent.z;
+      if (this.fields[x] === undefined) continue;
+      if (this.fields[x][y] === undefined) continue;
+      if (this.fields[x][y][z] === undefined) continue;
+      if (this.fields[x][y][z].status == 'covered') {
+        const uncoveredField = this.uncoverField({ x, y, z });
+        //@ts-ignore
+        if ("adjacentMines" in uncoveredField)
+          uncoveredFields.push(uncoveredField);
+        //@ts-ignore
+        else if ("message" in uncoveredField)
+          return uncoveredField;
+      }
+    }
+    return uncoveredFields;
+  }
+
+  public selectAdjacentFields(p: Position): GameOver | Field[] | undefined {
+    const field = this.fields[p.x][p.y][p.z];
+    if (field.status == 'uncovered' || field.status == 'flagged') return;
+    let x, y, z, adjacentFlags = 0;
+    this.adjacentFields.forEach(adjacent => {
+      x = p.x + adjacent.x;
+      y = p.y + adjacent.y;
+      z = p.z + adjacent.z;
+      if (this.fields[x] === undefined) return;
+      if (this.fields[x][y] === undefined) return;
+      if (this.fields[x][y][z] === undefined) return;
+      if (this.fields[x][y][z].status == 'flagged')
+        adjacentFlags++;
+    });
+    if (adjacentFlags == field.adjacentMines) {
+      return this.uncoverAdjacentFields(p);
+    }
+  }
+
 }

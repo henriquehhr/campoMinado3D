@@ -5,7 +5,7 @@ import { TrackballControls } from 'three/addons/controls/TrackballControls.js';
 import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry.js';
 import { FontLoader } from 'three/examples/jsm/loaders/FontLoader.js';
 
-const mineSweeper = new MineSweeper3D(6, 6, 6, 5);
+const mineSweeper = new MineSweeper3D(10, 10, 10, 10);
 
 const numberColor = [
   0,
@@ -38,7 +38,7 @@ fontLoader.load('assets/helvetiker_regular.typeface.json', (font) => {
   }
 
   // Tamanho e quantidade de cubos menores
-  const cubeSize = 0.5;
+  const cubeSize = 0.4;
   const cubeCount = mineSweeper.x;
 
   // Espaço vazio entre os cubos
@@ -83,7 +83,7 @@ fontLoader.load('assets/helvetiker_regular.typeface.json', (font) => {
         const positionY = (j - cubeCount / 2) * (cubeSize + spacing) + (cubeSize + spacing) / 2;
         const positionZ = (k - cubeCount / 2) * (cubeSize + spacing) + (cubeSize + spacing) / 2;
 
-        const numberOfAdjacentMines = mineSweeper.fields[i][j][k];
+        const numberOfAdjacentMines = mineSweeper.fields[i][j][k].adjacentMines;
         const isMine = mineSweeper.mineFields.some(mine => mine.x == i && mine.y == j && mine.z == k);
         if (numberOfAdjacentMines > 0 || isMine) {
           let textMesh: THREE.Mesh<TextGeometry>;
