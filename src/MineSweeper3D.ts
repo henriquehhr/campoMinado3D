@@ -70,16 +70,14 @@ export default class MineSweeper3D {
   }
 
   calculateNumberOfAdjacentMinesPerField() {
-    for (let i = 0; i < this.numberOfMines; i++) {
-      let mine = this.mineFields[i];
-      for (let j = 0; j < this.adjacentFields.length; j++) {
-        let adjacent = this.adjacentFields[j];
-        if (this.fields[mine.x + adjacent.x] === undefined) continue;
-        if (this.fields[mine.x + adjacent.x][mine.y + adjacent.y] === undefined) continue;
+    this.mineFields.forEach(mine => {
+      this.adjacentFields.forEach(adjacent => {
+        if (this.fields[mine.x + adjacent.x] === undefined) return;
+        if (this.fields[mine.x + adjacent.x][mine.y + adjacent.y] === undefined) return;
         if (this.fields[mine.x + adjacent.x][mine.y + adjacent.y][mine.z + adjacent.z] === undefined)
-          continue;
+          return;
         this.fields[mine.x + adjacent.x][mine.y + adjacent.y][mine.z + adjacent.z]++;
-      }
-    }
+      });
+    });
   }
 }

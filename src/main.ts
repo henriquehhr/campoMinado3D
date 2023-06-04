@@ -124,16 +124,15 @@ fontLoader.load('assets/helvetiker_regular.typeface.json', (font) => {
     clickMouse.y = - (event.clientY / window.innerHeight) * 2 + 1;
     raycaster.setFromCamera(clickMouse, camera);
     const intersects = raycaster.intersectObjects(scene.children);
-    let cube: THREE.Object3D | null = intersects[0].object;
-    //const { object: cube } = intersects.find(shape => shape.object.geometry instanceof THREE.BoxGeometry) ?? { object: null };
+    //@ts-ignore
+    const { object: cube } = intersects.find(shape => shape.object.geometry instanceof THREE.BoxGeometry) ?? { object: null };
     if (!cube) return;
     if (cube.scale.x !== 1) return;
     //const randomColor = Math.random() * 0xffffff;
     //cube.material.color.setHex(randomColor);
-    //reduceCube(cube)
+    reduceCube(cube)
   });
 
-  /*
   function reduceCube(cube: THREE.Object3D) {
     if (!cube) return;
     const initialScale = cube.scale.clone();
@@ -155,7 +154,7 @@ fontLoader.load('assets/helvetiker_regular.typeface.json', (font) => {
       }
     }, interval);
   }
-*/
+
   // Função de renderização
   function animate() {
     requestAnimationFrame(animate);
