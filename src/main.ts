@@ -6,7 +6,7 @@ import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry.js';
 import { FontLoader } from 'three/examples/jsm/loaders/FontLoader.js';
 import { Position } from './types.js';
 
-const mineSweeper = new MineSweeper3D(6, 6, 6, 20);
+const mineSweeper = new MineSweeper3D(6, 6, 6, 15);
 
 const numberColor = [
   0,
@@ -129,6 +129,8 @@ fontLoader.load('assets/helvetiker_regular.typeface.json', (font) => {
       isDragging = false;
       return;
     }
+    if (event.which == 3 || event.button == 2)
+      return;
     clickMouse.x = (event.clientX / window.innerWidth) * 2 - 1;
     clickMouse.y = - (event.clientY / window.innerHeight) * 2 + 1;
     raycaster.setFromCamera(clickMouse, camera);
@@ -178,6 +180,32 @@ fontLoader.load('assets/helvetiker_regular.typeface.json', (font) => {
       }, interval);
     }
   */
+
+  window.addEventListener("contextmenu", (event) => {
+    event.preventDefault();
+    clickMouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+    clickMouse.y = - (event.clientY / window.innerHeight) * 2 + 1;
+    raycaster.setFromCamera(clickMouse, camera);
+    const intersects = raycaster.intersectObjects(scene.children);
+    //@ts-ignore
+    const { object: cube } = intersects.find(shape => shape.object.geometry instanceof THREE.BoxGeometry) ?? { object: null };
+    if (!cube) return;
+    if (cube.scale.x !== 1) return;
+    //const randomColor = Math.random() * 0xffffff;
+    //cube.material.color.setHex(randomColor);
+    //reduceCube(cube);
+    const p = getFieldPosition(cube.position);
+    const status = mineSweeper.flagAField(p);
+    let color;
+    if (status == 'flagged')
+      color = 0xF73970;
+    else if (status == 'covered')
+      color = 0x006655;
+    if (status != 'uncovered')
+      //@ts-ignore
+      cube.material.color.set(color);
+  });
+
   function getFieldPosition(v: THREE.Vector3): Position {
     const s = cubeSize + spacing;
     const x = Math.round(((cubeCount * s) / 2 - (s / 2) + v.x) / s);
