@@ -6,7 +6,7 @@ import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry.js';
 import { FontLoader } from 'three/examples/jsm/loaders/FontLoader.js';
 import { Position } from './types.js';
 
-const mineSweeper = new MineSweeper3D(6, 6, 6, 8);
+const mineSweeper = new MineSweeper3D(6, 6, 6, 20);
 
 const numberColor = [
   0,
@@ -32,6 +32,13 @@ fontLoader.load('assets/helvetiker_regular.typeface.json', (font) => {
       height: 0.05,
       curveSegments: 12,
     });
+    textGeometry.computeBoundingBox();
+    if (textGeometry.boundingBox) {
+      const textWidth = textGeometry.boundingBox.max.x - textGeometry.boundingBox.min.x;
+      const textHeight = textGeometry.boundingBox.max.y - textGeometry.boundingBox.min.y;
+      textGeometry.translate(-0.5 * textWidth, 0, 0);
+      textGeometry.translate(0, -0.5 * textHeight, 0);
+    }
     const textMesh = new THREE.Mesh(textGeometry, textMaterial);
     textMesh.position.copy(position);
 
@@ -54,7 +61,7 @@ fontLoader.load('assets/helvetiker_regular.typeface.json', (font) => {
   camera.updateProjectionMatrix();
 
   // Crie um renderizador
-  const antialias = { antialias: false }
+  const antialias = { antialias: true }
   const renderer = new THREE.WebGLRenderer(antialias);
   renderer.setSize(window.innerWidth, window.innerHeight);
   document.body.appendChild(renderer.domElement);
