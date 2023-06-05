@@ -86,23 +86,26 @@ export default class MineSweeper3D {
     return this.fields[p.x][p.y][p.z].status;
   }
 
-  public uncoverField(p: Position): GameOver | Field | Field[] | undefined {
+  public uncoverField(p: Position): Position[] | undefined {
     const field = this.fields[p.x][p.y][p.z];
     if (field.status == 'flagged' || field.status == 'uncovered') return;
-    if (field.mine)
-      return { message: 'You lose', mineFields: this.mineFields };
+    if (field.mine) return;
+    //if (field.mine)
+    //  return { message: 'You lose', mineFields: this.mineFields };
     field.status = 'uncovered';
     this.coveredSafeFields--;
-    if (this.coveredSafeFields === 0)
-      return { message: 'You win', mineFields: this.mineFields };
-    /*if (field.adjacentMines === 0) {
-      return this.uncoverAdjacentFields(p);
-    }*/
-    return field;
+    //if (this.coveredSafeFields === 0)
+    //  return { message: 'You win', mineFields: this.mineFields };
+    if (field.adjacentMines === 0) {
+      const adjacents = this.uncoverAdjacentFields(p);
+      if (adjacents)
+        return [p, ...adjacents];
+    }
+    return [p];
   }
 
-  private uncoverAdjacentFields(p: Position,): GameOver | Field[] | undefined {
-    const uncoveredFields: Field[] = [];
+  private uncoverAdjacentFields(p: Position): Position[] | undefined {
+    let uncoveredFields: Position[] = [];
     let x, y, z;
     for (const adjacent of this.adjacentFields) {
       x = p.x + adjacent.x;
@@ -114,17 +117,17 @@ export default class MineSweeper3D {
       if (this.fields[x][y][z].status == 'covered') {
         const uncoveredField = this.uncoverField({ x, y, z });
         //@ts-ignore
-        if ("adjacentMines" in uncoveredField)
-          uncoveredFields.push(uncoveredField);
+        //if ("adjacentMines" in uncoveredField)
+        uncoveredFields = [...uncoveredFields, ...uncoveredField];
         //@ts-ignore
-        else if ("message" in uncoveredField)
-          return uncoveredField;
+        //else if ("message" in uncoveredField)
+        //return uncoveredField;
       }
     }
     return uncoveredFields;
   }
 
-  public selectAdjacentFields(p: Position): GameOver | Field[] | undefined {
+  public selectAdjacentFields(p: Position): GameOver | Position[] | undefined {
     const field = this.fields[p.x][p.y][p.z];
     if (field.status == 'uncovered' || field.status == 'flagged') return;
     let x, y, z, adjacentFlags = 0;

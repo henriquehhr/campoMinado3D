@@ -6,7 +6,7 @@ import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry.js';
 import { FontLoader } from 'three/examples/jsm/loaders/FontLoader.js';
 import { Position } from './types.js';
 
-const mineSweeper = new MineSweeper3D(6, 6, 6, 6);
+const mineSweeper = new MineSweeper3D(6, 6, 6, 8);
 
 const numberColor = [
   0,
@@ -66,15 +66,17 @@ fontLoader.load('assets/helvetiker_regular.typeface.json', (font) => {
   // Crie um grupo para os cubos menores
   const cubeGroup = new THREE.Group();
 
+  const cubeMap = new Map<string, THREE.Mesh<THREE.BoxGeometry>>;
+
+
   const texts: THREE.Mesh<TextGeometry>[] = [];
   // Crie os cubos menores e adicione-os ao grupo
   for (let i = 0; i < cubeCount; i++) {
     for (let j = 0; j < cubeCount; j++) {
-      for (let k = 0; k < cubeCount; k++) {
+      for (let k = cubeCount - 1; k >= 0; k--) {
         const material = new THREE.MeshBasicMaterial({ color: 0x006655, transparent: false, opacity: 0.5 });
         const geometry = new THREE.BoxGeometry(cubeSize, cubeSize, cubeSize);
         const cube = new THREE.Mesh(geometry, material);
-
         // Crie as arestas dos cubos menores
         const edgeMaterial = new THREE.LineBasicMaterial({ color: 0xFFFFFF, transparent: true, opacity: 0.3 });
         const edges = new THREE.EdgesGeometry(geometry);
@@ -101,6 +103,7 @@ fontLoader.load('assets/helvetiker_regular.typeface.json', (font) => {
         }
         cube.position.set(positionX, positionY, positionZ);
         cubeGroup.add(cube);
+        cubeMap.set(`${i}${j}${k}`, cube);
       }
     }
   }
@@ -133,10 +136,17 @@ fontLoader.load('assets/helvetiker_regular.typeface.json', (font) => {
     const p = getFieldPosition(cube.position);
     //console.log(p);
     //@ts-ignore
-    const { message } = mineSweeper.uncoverField(p);
-    if (message)
-      console.log(message);
+    const positionsToUncover = mineSweeper.uncoverField(p);
+    console.log(positionsToUncover);
+    if (positionsToUncover?.length == 0) return;
     cubeGroup.remove(cube);
+    if (!positionsToUncover) return;
+    for (const position of positionsToUncover) {
+      const cubeToRemove = cubeMap.get(`${position.x}${position.y}${position.z}`)
+      if (!cubeToRemove) continue;
+      cubeGroup.remove(cubeToRemove);
+    }
+
   });
 
   function reduceCube(cube: THREE.Object3D) {
@@ -163,10 +173,10 @@ fontLoader.load('assets/helvetiker_regular.typeface.json', (font) => {
 
   function getFieldPosition(v: THREE.Vector3): Position {
     const s = cubeSize + spacing;
-    const i = Math.round(((cubeCount * s) / 2 - (s / 2) + v.x) / s);
-    const j = Math.round(((cubeCount * s) / 2 - (s / 2) + v.y) / s);
-    const k = Math.round(((cubeCount * s) / 2 - (s / 2) + v.z) / s);
-    return { x: i, y: j, z: k };
+    const x = Math.round(((cubeCount * s) / 2 - (s / 2) + v.x) / s);
+    const y = Math.round(((cubeCount * s) / 2 - (s / 2) + v.y) / s);
+    const z = Math.round(((cubeCount * s) / 2 - (s / 2) + v.z) / s);
+    return { x, y, z };
   }
 
   // Função de renderização
