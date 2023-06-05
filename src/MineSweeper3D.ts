@@ -91,6 +91,7 @@ export default class MineSweeper3D {
     if (field.status == 'flagged' || field.status == 'uncovered') return;
     if (field.mine)
       return { message: 'You lose', mineFields: this.mineFields };
+    field.status = 'uncovered';
     this.coveredSafeFields--;
     if (this.coveredSafeFields === 0)
       return { message: 'You win', mineFields: this.mineFields };
