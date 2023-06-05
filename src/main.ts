@@ -4,8 +4,9 @@ import * as THREE from 'three';
 import { TrackballControls } from 'three/addons/controls/TrackballControls.js';
 import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry.js';
 import { FontLoader } from 'three/examples/jsm/loaders/FontLoader.js';
+import { Position } from './types.js';
 
-const mineSweeper = new MineSweeper3D(10, 10, 10, 10);
+const mineSweeper = new MineSweeper3D(6, 6, 6, 6);
 
 const numberColor = [
   0,
@@ -53,7 +54,7 @@ fontLoader.load('assets/helvetiker_regular.typeface.json', (font) => {
   camera.updateProjectionMatrix();
 
   // Crie um renderizador
-  const antialias = { antialias: true }
+  const antialias = { antialias: false }
   const renderer = new THREE.WebGLRenderer(antialias);
   renderer.setSize(window.innerWidth, window.innerHeight);
   document.body.appendChild(renderer.domElement);
@@ -83,25 +84,23 @@ fontLoader.load('assets/helvetiker_regular.typeface.json', (font) => {
         const positionY = (j - cubeCount / 2) * (cubeSize + spacing) + (cubeSize + spacing) / 2;
         const positionZ = (k - cubeCount / 2) * (cubeSize + spacing) + (cubeSize + spacing) / 2;
 
-        const numberOfAdjacentMines = mineSweeper.fields[i][j][k].adjacentMines;
-        const isMine = mineSweeper.mineFields.some(mine => mine.x == i && mine.y == j && mine.z == k);
-        if (numberOfAdjacentMines > 0 || isMine) {
+        const adjacentMines = mineSweeper.fields[i][j][k].adjacentMines;
+        const isMine = mineSweeper.fields[i][j][k].mine;
+        if (adjacentMines > 0 || isMine) {
           let textMesh: THREE.Mesh<TextGeometry>;
           if (!isMine) {
-            textMesh = createTextObject('' + numberOfAdjacentMines, new THREE.Vector3(positionX, positionY, positionZ), numberColor[numberOfAdjacentMines]);
-            texts.push(textMesh);
-            cubeGroup.add(textMesh);
+            textMesh = createTextObject('' + adjacentMines, new THREE.Vector3(positionX, positionY, positionZ), numberColor[adjacentMines]);
           }
           else {
-            cube.position.set(positionX, positionY, positionZ);
-            cubeGroup.add(cube);
+            textMesh = createTextObject('X', new THREE.Vector3(positionX, positionY, positionZ), 0xFFc0cb)
           }
+          texts.push(textMesh);
+          cubeGroup.add(textMesh);
           edgesMesh.position.set(positionX, positionY, positionZ);
           cubeGroup.add(edgesMesh);
         }
-        // Posicione o cubo e suas arestas
-
-        // Adicione o cubo e suas arestas ao grupo
+        cube.position.set(positionX, positionY, positionZ);
+        cubeGroup.add(cube);
       }
     }
   }
@@ -130,7 +129,14 @@ fontLoader.load('assets/helvetiker_regular.typeface.json', (font) => {
     if (cube.scale.x !== 1) return;
     //const randomColor = Math.random() * 0xffffff;
     //cube.material.color.setHex(randomColor);
-    reduceCube(cube)
+    //reduceCube(cube);
+    const p = getFieldPosition(cube.position);
+    //console.log(p);
+    //@ts-ignore
+    const { message } = mineSweeper.uncoverField(p);
+    if (message)
+      console.log(message);
+    cubeGroup.remove(cube);
   });
 
   function reduceCube(cube: THREE.Object3D) {
@@ -153,6 +159,14 @@ fontLoader.load('assets/helvetiker_regular.typeface.json', (font) => {
         cube.scale.lerpVectors(initialScale, targetScale, t);
       }
     }, interval);
+  }
+
+  function getFieldPosition(v: THREE.Vector3): Position {
+    const s = cubeSize + spacing;
+    const i = Math.round(((cubeCount * s) / 2 - (s / 2) + v.x) / s);
+    const j = Math.round(((cubeCount * s) / 2 - (s / 2) + v.y) / s);
+    const k = Math.round(((cubeCount * s) / 2 - (s / 2) + v.z) / s);
+    return { x: i, y: j, z: k };
   }
 
   // Função de renderização

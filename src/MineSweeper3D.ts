@@ -94,9 +94,9 @@ export default class MineSweeper3D {
     this.coveredSafeFields--;
     if (this.coveredSafeFields === 0)
       return { message: 'You win', mineFields: this.mineFields };
-    if (field.adjacentMines === 0) {
+    /*if (field.adjacentMines === 0) {
       return this.uncoverAdjacentFields(p);
-    }
+    }*/
     return field;
   }
 
