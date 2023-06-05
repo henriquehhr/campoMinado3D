@@ -148,29 +148,29 @@ fontLoader.load('assets/helvetiker_regular.typeface.json', (font) => {
     }
 
   });
-
-  function reduceCube(cube: THREE.Object3D) {
-    if (!cube) return;
-    const initialScale = cube.scale.clone();
-    const targetScale = new THREE.Vector3(0, 0, 0);
-    const duration = 1; // Duração da animação em segundos
-    const interval = 10; // Intervalo entre os frames em milissegundos
-
-    let currentTime = 0;
-
-    const timer = setInterval(function () {
-      currentTime += interval / 1000; // Converter para segundos
-
-      if (currentTime > duration) {
-        clearInterval(timer);
-        cubeGroup.remove(cube);
-      } else {
-        const t = currentTime / duration;
-        cube.scale.lerpVectors(initialScale, targetScale, t);
-      }
-    }, interval);
-  }
-
+  /*
+    function reduceCube(cube: THREE.Object3D) {
+      if (!cube) return;
+      const initialScale = cube.scale.clone();
+      const targetScale = new THREE.Vector3(0, 0, 0);
+      const duration = 1; // Duração da animação em segundos
+      const interval = 10; // Intervalo entre os frames em milissegundos
+  
+      let currentTime = 0;
+  
+      const timer = setInterval(function () {
+        currentTime += interval / 1000; // Converter para segundos
+  
+        if (currentTime > duration) {
+          clearInterval(timer);
+          cubeGroup.remove(cube);
+        } else {
+          const t = currentTime / duration;
+          cube.scale.lerpVectors(initialScale, targetScale, t);
+        }
+      }, interval);
+    }
+  */
   function getFieldPosition(v: THREE.Vector3): Position {
     const s = cubeSize + spacing;
     const x = Math.round(((cubeCount * s) / 2 - (s / 2) + v.x) / s);
