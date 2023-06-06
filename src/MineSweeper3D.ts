@@ -88,7 +88,7 @@ export default class MineSweeper3D {
 
   public uncoverField(p: Position): Position[] | undefined {
     const field = this.fields[p.x][p.y][p.z];
-    if (field.status == 'flagged' || field.status == 'uncovered') return;
+    if (field.status == 'flagged' || field.status == 'uncovered') return [];
     if (field.mine) return;
     //if (field.mine)
     //  return { message: 'You lose', mineFields: this.mineFields };
