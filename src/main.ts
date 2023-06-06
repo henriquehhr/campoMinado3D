@@ -6,7 +6,7 @@ import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry.js';
 import { FontLoader } from 'three/examples/jsm/loaders/FontLoader.js';
 import { Position } from './types.js';
 
-const mineSweeper = new MineSweeper3D(6, 6, 6, 5);
+const mineSweeper = new MineSweeper3D(6, 6, 6, 10);
 
 // Tamanho e quantidade de cubos menores
 const cubeSize = 0.4;
@@ -27,6 +27,24 @@ const numberColor = [
   0x757575
 ];
 
+const cubeColor = 0x006655;
+const flaggedCubeColor = 0xF73970;
+//@ts-ignore
+const alternativeCubeColor = 0x21ABCD;
+const edgeColor = 0xFFFFFF;
+//@ts-ignore
+const selectedCubeColor = 0x224444;
+
+const adjacentFields: Position[] = [];
+for (let i = -1; i <= 1; i++) {
+  for (let j = -1; j <= 1; j++) {
+    for (let k = -1; k <= 1; k++) {
+      const position = { x: i, y: j, z: k };
+      adjacentFields.push(position);
+    }
+  }
+}
+
 const fontLoader = new FontLoader();
 fontLoader.load('assets/helvetiker_regular.typeface.json', (font) => {
 
@@ -39,13 +57,13 @@ fontLoader.load('assets/helvetiker_regular.typeface.json', (font) => {
       height: 0.05,
       curveSegments: 12,
     });
-    textGeometry.computeBoundingBox();
+    /*textGeometry.computeBoundingBox();
     if (textGeometry.boundingBox) {
       const textWidth = textGeometry.boundingBox.max.x - textGeometry.boundingBox.min.x;
       const textHeight = textGeometry.boundingBox.max.y - textGeometry.boundingBox.min.y;
       textGeometry.translate(-0.5 * textWidth, 0, 0);
       textGeometry.translate(0, -0.5 * textHeight, 0);
-    }
+    }*/
     const textMesh = new THREE.Mesh(textGeometry, textMaterial);
     textMesh.position.copy(position);
 
@@ -77,17 +95,23 @@ fontLoader.load('assets/helvetiker_regular.typeface.json', (font) => {
 
 
   const texts: THREE.Mesh<TextGeometry>[] = [];
+  const adjacentCubes: THREE.Mesh<THREE.BoxGeometry>[][][] = [];
   // Crie os cubos menores e adicione-os ao grupo
   for (let i = 0; i < cubeCount; i++) {
+    const line: Array<any> = [];
+    adjacentCubes.push(line);
     for (let j = 0; j < cubeCount; j++) {
+      const column: Array<any> = [];
+      adjacentCubes[i].push(column);
       for (let k = cubeCount - 1; k >= 0; k--) {
-        const material = new THREE.MeshBasicMaterial({ color: 0x006655, transparent: false, opacity: 0.5 });
+        const material = new THREE.MeshBasicMaterial({ color: cubeColor, transparent: false, opacity: 0.5 });
         const geometry = new THREE.BoxGeometry(cubeSize, cubeSize, cubeSize);
         const cube = new THREE.Mesh(geometry, material);
         // Crie as arestas dos cubos menores
-        const edgeMaterial = new THREE.LineBasicMaterial({ color: 0xFFFFFF, transparent: true, opacity: 0.3 });
+        const edgeMaterial = new THREE.LineBasicMaterial({ color: edgeColor, transparent: true, opacity: 0.3 });
         const edges = new THREE.EdgesGeometry(geometry);
         const edgesMesh = new THREE.LineSegments(edges, edgeMaterial);
+        adjacentCubes[i][j][k] = cube;
 
         const positionX = (i - cubeCount / 2) * (cubeSize + spacing) + (cubeSize + spacing) / 2;
         const positionY = (j - cubeCount / 2) * (cubeSize + spacing) + (cubeSize + spacing) / 2;
@@ -122,6 +146,13 @@ fontLoader.load('assets/helvetiker_regular.typeface.json', (font) => {
   const clickMouse = new THREE.Vector2();
   let isDragging = false;
 
+  window.addEventListener("keydown", event => {
+    if (event.ctrlKey)
+      window.addEventListener("mousemove", selectAdjacentCubes, false);
+  });
+  window.addEventListener("keyup", () => {
+    window.removeEventListener("mousemove", selectAdjacentCubes, false);
+  });
   window.addEventListener('mousedown', () => isDragging = false);
   window.addEventListener('mousemove', () => isDragging = true);
   window.addEventListener('mouseup', event => {
@@ -132,9 +163,8 @@ fontLoader.load('assets/helvetiker_regular.typeface.json', (font) => {
     clickMouse.x = (event.clientX / window.innerWidth) * 2 - 1;
     clickMouse.y = - (event.clientY / window.innerHeight) * 2 + 1;
     raycaster.setFromCamera(clickMouse, camera);
-    const intersects = raycaster.intersectObjects(scene.children);
-    //@ts-ignore
-    const { object: cube } = intersects.find(shape => shape.object.geometry instanceof THREE.BoxGeometry) ?? { object: null };
+    const intersects = raycaster.intersectObjects(scene.children) as THREE.Intersection<THREE.Mesh>[];
+    const { object: cube } = intersects.find(shape => (shape.object.geometry instanceof THREE.BoxGeometry)) ?? { object: null };
     if (!cube) return;
     if (cube.scale.x !== 1) return;
 
@@ -150,7 +180,6 @@ fontLoader.load('assets/helvetiker_regular.typeface.json', (font) => {
     const p = getFieldPosition(cube.position);
     const response = mineSweeper.clickField(p);
     const positionsToUncover = response.fieldsToUncover;
-    console.log(positionsToUncover);
     if (positionsToUncover?.length == 0) return;
     cubeGroup.remove(cube);
     if (!positionsToUncover) return;
@@ -167,12 +196,55 @@ fontLoader.load('assets/helvetiker_regular.typeface.json', (font) => {
     const status = mineSweeper.flagAField(p);
     let color;
     if (status == 'flagged')
-      color = 0xF73970;
+      color = flaggedCubeColor;
     else if (status == 'covered')
-      color = 0x006655;
+      color = cubeColor;
     if (status != 'uncovered')
       //@ts-ignore
       cube.material.color.set(color);
+  }
+
+  let lastIntersectedObject: THREE.Mesh | null = null;
+  function selectAdjacentCubes(event: MouseEvent) {
+    clickMouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+    clickMouse.y = - (event.clientY / window.innerHeight) * 2 + 1;
+    raycaster.setFromCamera(clickMouse, camera);
+    const intersects = raycaster.intersectObjects(scene.children) as THREE.Intersection<THREE.Mesh>[];
+    for (const mesh of intersects) {
+      if (mesh.object.geometry instanceof TextGeometry)
+        break;
+      if (mesh.object.geometry instanceof THREE.BoxGeometry) {
+        if (lastIntersectedObject)
+          changeColorOfAdjacentCubes(getFieldPosition(lastIntersectedObject.position), cubeColor);
+        return;
+      }
+    }
+    const { object: number } = intersects.find(shape => shape.object.geometry instanceof TextGeometry) ?? { object: null };
+
+    if (!number) {// está com o mouse fora do número ou saiu do número
+      if (lastIntersectedObject)
+        changeColorOfAdjacentCubes(getFieldPosition(lastIntersectedObject.position), cubeColor);
+      lastIntersectedObject = null;
+      return;
+    }
+    if (lastIntersectedObject !== number) { //acabou de entrar no número
+      if (lastIntersectedObject)
+        changeColorOfAdjacentCubes(getFieldPosition(lastIntersectedObject.position), cubeColor);
+      changeColorOfAdjacentCubes(getFieldPosition(number.position), selectedCubeColor);
+      lastIntersectedObject = number;
+    } else {
+      changeColorOfAdjacentCubes(getFieldPosition(number.position), selectedCubeColor);
+    }
+  }
+
+  function changeColorOfAdjacentCubes(p: Position, color: number) {
+    for (const a of adjacentFields) {
+      if (!adjacentCubes[p.x + a.x]) continue;
+      if (!adjacentCubes[p.x + a.x][p.y + a.y]) continue;
+      if (!adjacentCubes[p.x + a.x][p.y + a.y][p.z + a.z]) continue;
+      //@ts-ignore
+      adjacentCubes[p.x + a.x][p.y + a.y][p.z + a.z].material.color.set(color);
+    }
   }
   //function leftAndRightClickCube(intersect: THREE.Intersection[]) { }
   /*

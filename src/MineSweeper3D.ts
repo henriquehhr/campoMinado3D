@@ -2,18 +2,14 @@ import { Field, Position, FieldStatus, ClickResponse } from "./types";
 import { random } from "./utils";
 
 export default class MineSweeper3D {
-  fields: Field[][][];
-  mineFields: Position[];
-  adjacentFields: Position[];
+  fields: Field[][][] = [];
+  mineFields: Position[] = [];
+  adjacentFields: Position[] = [];
   coveredSafeFields: number;
-  gameOver: boolean;
+  gameOver = false;
 
   constructor(public readonly x: number, public readonly y: number, public readonly z: number, public readonly numberOfMines: number) {
-    this.fields = [];
-    this.mineFields = [];
-    this.adjacentFields = [];
     this.coveredSafeFields = (x * y * z) - numberOfMines;
-    this.gameOver = false;
 
     this.initializeFields();
     this.randomizeMines();
