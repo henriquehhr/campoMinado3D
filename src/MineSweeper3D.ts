@@ -6,12 +6,14 @@ export default class MineSweeper3D {
   mineFields: Position[];
   adjacentFields: Position[];
   coveredSafeFields: number;
+  gameOver: boolean;
 
   constructor(public readonly x: number, public readonly y: number, public readonly z: number, public readonly numberOfMines: number) {
     this.fields = [];
     this.mineFields = [];
     this.adjacentFields = [];
     this.coveredSafeFields = (x * y * z) - numberOfMines;
+    this.gameOver = false;
 
     this.initializeFields();
     this.randomizeMines();
@@ -81,6 +83,7 @@ export default class MineSweeper3D {
 
   public flagAField(p: Position): FieldStatus {
     const status = this.fields[p.x][p.y][p.z].status;
+    if (this.gameOver) return status;
     if (status == 'uncovered') return 'uncovered';
     this.fields[p.x][p.y][p.z].status = status == 'covered' ? 'flagged' : 'covered';
     return this.fields[p.x][p.y][p.z].status;
@@ -90,6 +93,8 @@ export default class MineSweeper3D {
     const response: ClickResponse = {
       fieldsToUncover: []
     };
+    if (this.gameOver)
+      return response;
     response.fieldsToUncover = this.uncoverField(p);
     if (this.coveredSafeFields === 0)
       response.gameOver = 'win';
@@ -102,6 +107,8 @@ export default class MineSweeper3D {
     }
     if (gameLoss)
       response.gameOver = 'loss';
+    if (response.gameOver)
+      this.gameOver = true;
     return response;
   }
 
