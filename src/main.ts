@@ -6,7 +6,14 @@ import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry.js';
 import { FontLoader } from 'three/examples/jsm/loaders/FontLoader.js';
 import { Position } from './types.js';
 
-const mineSweeper = new MineSweeper3D(6, 6, 6, 15);
+const mineSweeper = new MineSweeper3D(6, 6, 6, 5);
+
+// Tamanho e quantidade de cubos menores
+const cubeSize = 0.4;
+const cubeCount = mineSweeper.x;
+
+// Espaço vazio entre os cubos
+const spacing = 0;
 
 const numberColor = [
   0,
@@ -44,13 +51,6 @@ fontLoader.load('assets/helvetiker_regular.typeface.json', (font) => {
 
     return textMesh;
   }
-
-  // Tamanho e quantidade de cubos menores
-  const cubeSize = 0.4;
-  const cubeCount = mineSweeper.x;
-
-  // Espaço vazio entre os cubos
-  const spacing = 0;
 
   // Crie uma cena
   const scene = new THREE.Scene();
@@ -148,7 +148,8 @@ fontLoader.load('assets/helvetiker_regular.typeface.json', (font) => {
   function leftClickCube(cube: any) {
     //reduceCube(cube);
     const p = getFieldPosition(cube.position);
-    const positionsToUncover = mineSweeper.uncoverField(p);
+    const response = mineSweeper.clickField(p);
+    const positionsToUncover = response.fieldsToUncover;
     console.log(positionsToUncover);
     if (positionsToUncover?.length == 0) return;
     cubeGroup.remove(cube);
@@ -158,6 +159,8 @@ fontLoader.load('assets/helvetiker_regular.typeface.json', (font) => {
       if (!cubeToRemove) continue;
       cubeGroup.remove(cubeToRemove);
     }
+    if (response.gameOver)
+      alert(response.gameOver);
   }
   function rightClickCube(cube: any) {
     const p = getFieldPosition(cube.position);

@@ -1,4 +1,4 @@
-import { Field, Position, GameOver, FieldStatus } from "./types";
+import { Field, Position, GameOver, FieldStatus, ClickResponse } from "./types";
 import { random } from "./utils";
 
 export default class MineSweeper3D {
@@ -86,25 +86,39 @@ export default class MineSweeper3D {
     return this.fields[p.x][p.y][p.z].status;
   }
 
-  public uncoverField(p: Position): Position[] | undefined {
+  public clickField(p: Position): ClickResponse {
+    const response: ClickResponse = {
+      fieldsToUncover: []
+    };
+    response.fieldsToUncover = this.uncoverField(p);
+    if (this.coveredSafeFields === 0)
+      response.gameOver = 'win';
+    let gameLoss;
+    for (const field of response.fieldsToUncover) {
+      for (const mine of this.mineFields) {
+        if (field.x == mine.x && field.y == mine.y && field.z == mine.z)
+          gameLoss = true;
+      }
+    }
+    if (gameLoss)
+      response.gameOver = 'loss';
+    return response;
+  }
+
+  private uncoverField(p: Position): Position[] {
     const field = this.fields[p.x][p.y][p.z];
     if (field.status == 'flagged' || field.status == 'uncovered') return [];
-    if (field.mine) return;
-    //if (field.mine)
-    //  return { message: 'You lose', mineFields: this.mineFields };
     field.status = 'uncovered';
-    this.coveredSafeFields--;
-    //if (this.coveredSafeFields === 0)
-    //  return { message: 'You win', mineFields: this.mineFields };
+    if (!field.mine)
+      this.coveredSafeFields--;
     if (field.adjacentMines === 0) {
       const adjacents = this.uncoverAdjacentFields(p);
-      if (adjacents)
-        return [p, ...adjacents];
+      return [p, ...adjacents];
     }
     return [p];
   }
 
-  private uncoverAdjacentFields(p: Position): Position[] | undefined {
+  private uncoverAdjacentFields(p: Position): Position[] {
     let uncoveredFields: Position[] = [];
     let x, y, z;
     for (const adjacent of this.adjacentFields) {
@@ -116,12 +130,7 @@ export default class MineSweeper3D {
       if (this.fields[x][y][z] === undefined) continue;
       if (this.fields[x][y][z].status == 'covered') {
         const uncoveredField = this.uncoverField({ x, y, z });
-        //@ts-ignore
-        //if ("adjacentMines" in uncoveredField)
         uncoveredFields = [...uncoveredFields, ...uncoveredField];
-        //@ts-ignore
-        //else if ("message" in uncoveredField)
-        //return uncoveredField;
       }
     }
     return uncoveredFields;

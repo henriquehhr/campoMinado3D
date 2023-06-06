@@ -12,8 +12,12 @@ export interface Field {
   adjacentMines: number
 }
 
-
 export interface GameOver {
   message: 'You lose' | 'You win';
   mineFields: Array<Position>;
+}
+
+export interface ClickResponse {
+  fieldsToUncover: Position[];
+  gameOver?: 'win' | 'loss';
 }
