@@ -1,4 +1,4 @@
-import { Field, Position, GameOver, FieldStatus, ClickResponse } from "./types";
+import { Field, Position, FieldStatus, ClickResponse } from "./types";
 import { random } from "./utils";
 
 export default class MineSweeper3D {
@@ -136,7 +136,7 @@ export default class MineSweeper3D {
     return uncoveredFields;
   }
 
-  public selectAdjacentFields(p: Position): GameOver | Position[] | undefined {
+  public selectAdjacentFields(p: Position): Position[] | undefined {
     const field = this.fields[p.x][p.y][p.z];
     if (field.status == 'uncovered' || field.status == 'flagged') return;
     let x, y, z, adjacentFlags = 0;
