@@ -6,7 +6,7 @@ import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry.js';
 import { FontLoader } from 'three/examples/jsm/loaders/FontLoader.js';
 import { Position } from './types.js';
 
-const mineSweeper = new MineSweeper3D(6, 6, 6, 10);
+const mineSweeper = new MineSweeper3D(6, 6, 6, 8);
 
 // Tamanho e quantidade de cubos menores
 const cubeSize = 0.4;
@@ -50,13 +50,21 @@ fontLoader.load('assets/helvetiker_regular.typeface.json', (font) => {
 
   // Crie uma função para criar um objeto de texto
   function createTextObject(text: string, position: THREE.Vector3, color: number) {
-    const textMaterial = new THREE.MeshBasicMaterial({ color: color });
+
+    const textMaterial = new THREE.MeshBasicMaterial({
+      color: color,
+      side: THREE.DoubleSide
+    });
+    const shapes = font.generateShapes(text, 0.17);
+    const textGeometry = new THREE.ShapeGeometry(shapes);
+
+    /*const textMaterial = new THREE.MeshBasicMaterial({ color: color });
     const textGeometry = new TextGeometry(text, {
       font: font,
       size: 0.2,
       height: 0.05,
       curveSegments: 12,
-    });
+    });*/
     /*textGeometry.computeBoundingBox();
     if (textGeometry.boundingBox) {
       const textWidth = textGeometry.boundingBox.max.x - textGeometry.boundingBox.min.x;
@@ -94,7 +102,7 @@ fontLoader.load('assets/helvetiker_regular.typeface.json', (font) => {
   const cubeMap = new Map<string, THREE.Mesh<THREE.BoxGeometry>>;
 
 
-  const texts: THREE.Mesh<TextGeometry>[] = [];
+  const texts: THREE.Mesh[] = [];
   const adjacentCubes: THREE.Mesh<THREE.BoxGeometry>[][][] = [];
   // Crie os cubos menores e adicione-os ao grupo
   for (let i = 0; i < cubeCount; i++) {
@@ -120,7 +128,7 @@ fontLoader.load('assets/helvetiker_regular.typeface.json', (font) => {
         const adjacentMines = mineSweeper.fields[i][j][k].adjacentMines;
         const isMine = mineSweeper.fields[i][j][k].mine;
         if (adjacentMines > 0 || isMine) {
-          let textMesh: THREE.Mesh<TextGeometry>;
+          let textMesh: THREE.Mesh;
           if (!isMine) {
             textMesh = createTextObject('' + adjacentMines, new THREE.Vector3(positionX, positionY, positionZ), numberColor[adjacentMines]);
           }
@@ -211,7 +219,7 @@ fontLoader.load('assets/helvetiker_regular.typeface.json', (font) => {
     raycaster.setFromCamera(clickMouse, camera);
     const intersects = raycaster.intersectObjects(scene.children) as THREE.Intersection<THREE.Mesh>[];
     for (const mesh of intersects) {
-      if (mesh.object.geometry instanceof TextGeometry)
+      if (mesh.object.geometry instanceof THREE.ShapeGeometry)
         break;
       if (mesh.object.geometry instanceof THREE.BoxGeometry) {
         if (lastIntersectedObject)
@@ -219,7 +227,7 @@ fontLoader.load('assets/helvetiker_regular.typeface.json', (font) => {
         return;
       }
     }
-    const { object: number } = intersects.find(shape => shape.object.geometry instanceof TextGeometry) ?? { object: null };
+    const { object: number } = intersects.find(shape => shape.object.geometry instanceof THREE.ShapeGeometry) ?? { object: null };
 
     if (!number) {// está com o mouse fora do número ou saiu do número
       if (lastIntersectedObject)
