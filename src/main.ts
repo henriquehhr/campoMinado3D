@@ -7,7 +7,7 @@ import { Position } from './types.js';
 const x = 6;
 const y = 6;
 const z = 6;
-const mineSweeper = new MineSweeper3D(x, y, z, 4);
+const mineSweeper = new MineSweeper3D(x, y, z, 12);
 const sceneInit = new SceneInit();
 
 // Tamanho e quantidade de cubos menores
@@ -59,7 +59,7 @@ function createTextObject(text: string, position: THREE.Vector3, color: number) 
   const anguloInicial = 0; // Ângulo inicial em radianos
   const anguloCompleto = Math.PI * 2; // Ângulo completo em radianos
   const geometriaCirculo = new THREE.CircleGeometry(raio, segmentos, anguloInicial, anguloCompleto);
-  const materialCirculo = new THREE.MeshBasicMaterial({ color: 0xff0000, transparent: true, opacity: 0 });
+  const materialCirculo = new THREE.MeshBasicMaterial({ color: 0xFFFFFF, transparent: true, opacity: 0 });
   const circuloMesh = new THREE.Mesh(geometriaCirculo, materialCirculo);
   circuloMesh.position.copy(position);
 
@@ -76,8 +76,8 @@ function createTextObject(text: string, position: THREE.Vector3, color: number) 
   //   textGeometry.translate(-0.5 * textWidth, 0, 0);
   //   textGeometry.translate(0, -0.5 * textHeight, 0);
   // }
-  textGeometry.translate(-0.5 * raio, 0, 0);
-  textGeometry.translate(0, -0.5 * raio, 0);
+  textGeometry.translate(-0.6 * raio, 0, 0);
+  textGeometry.translate(0, -0.6 * raio, 0);
   const textMesh = new THREE.Mesh(textGeometry, textMaterial);
   //textMesh.position.copy(position);
 
@@ -136,13 +136,13 @@ for (let i = 0; i < cubeCount; i++) {
   }
 }
 
-const geometry = new THREE.BoxGeometry((cubeSize + spacing) * x, (cubeSize + spacing) * y, (cubeSize + spacing) * z);
-const edgeMaterial = new THREE.LineBasicMaterial({ color: edgeColor, transparent: true, opacity: 0.1 });
-const edges = new THREE.EdgesGeometry(geometry);
-const edgesMesh = new THREE.LineSegments(edges, edgeMaterial);
+// const geometry = new THREE.BoxGeometry((cubeSize + spacing) * x, (cubeSize + spacing) * y, (cubeSize + spacing) * z);
+// const edgeMaterial = new THREE.LineBasicMaterial({ color: edgeColor, transparent: true, opacity: 0.1 });
+// const edges = new THREE.EdgesGeometry(geometry);
+// const edgesMesh = new THREE.LineSegments(edges, edgeMaterial);
 
 sceneInit.scene.add(cubeGroup);
-sceneInit.scene.add(edgesMesh);
+// sceneInit.scene.add(edgesMesh);
 
 let isDragging = 0;
 let ctrlPressed = false;
@@ -210,33 +210,47 @@ function rightClickCube(cube: any) {
 }
 
 let lastIntersectedObject: THREE.Mesh | null = null;
+const opacity = 0.3;
 function selectAdjacentCubes(event: MouseEvent) {
   const intersects = sceneInit.getIntersectedObjects(event.clientX, event.clientY);
   for (const mesh of intersects) {
     if (mesh.object.geometry instanceof THREE.CircleGeometry)
       break;
     if (mesh.object.geometry instanceof THREE.BoxGeometry) {
-      if (lastIntersectedObject)
+      if (lastIntersectedObject) {
         changeColorOfAdjacentCubes(getFieldPosition(lastIntersectedObject.position), cubeColor);
+        //@ts-ignore
+        lastIntersectedObject.material.opacity = 0;
+      }
       return;
     }
   }
   const { object: number } = intersects.find(shape => shape.object.geometry instanceof THREE.CircleGeometry) ?? { object: null };
 
   if (!number) {// está com o mouse fora do número ou saiu do número
-    if (lastIntersectedObject)
+    if (lastIntersectedObject) {
       changeColorOfAdjacentCubes(getFieldPosition(lastIntersectedObject.position), cubeColor);
+      //@ts-ignore
+      lastIntersectedObject.material.opacity = 0;
+    }
     lastIntersectedObject = null;
     return;
   }
   if (lastIntersectedObject !== number) { //acabou de entrar no número
-    if (lastIntersectedObject)
+    if (lastIntersectedObject) {
       changeColorOfAdjacentCubes(getFieldPosition(lastIntersectedObject.position), cubeColor);
+      //@ts-ignore
+      lastIntersectedObject.material.opacity = 0;
+    }
     changeColorOfAdjacentCubes(getFieldPosition(number.position), selectedCubeColor);
+    //@ts-ignore
+    number.material.opacity = opacity;
     //number.scale.multiplyScalar(2);
     lastIntersectedObject = number;
   } else {
     changeColorOfAdjacentCubes(getFieldPosition(number.position), selectedCubeColor);
+    //@ts-ignore
+    number.material.opacity = opacity;
   }
 }
 
