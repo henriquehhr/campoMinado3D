@@ -59,21 +59,13 @@ function createTextObject(text: string, position: THREE.Vector3, color: number) 
   });
   const shapes = font.generateShapes(text, 0.17);
   const textGeometry = new THREE.ShapeGeometry(shapes);
-
-  /*const textMaterial = new THREE.MeshBasicMaterial({ color: color });
-  const textGeometry = new TextGeometry(text, {
-    font: font,
-    size: 0.2,
-    height: 0.05,
-    curveSegments: 12,
-  });*/
-  /*textGeometry.computeBoundingBox();
+  textGeometry.computeBoundingBox();
   if (textGeometry.boundingBox) {
     const textWidth = textGeometry.boundingBox.max.x - textGeometry.boundingBox.min.x;
     const textHeight = textGeometry.boundingBox.max.y - textGeometry.boundingBox.min.y;
     textGeometry.translate(-0.5 * textWidth, 0, 0);
     textGeometry.translate(0, -0.5 * textHeight, 0);
-  }*/
+  }
   const textMesh = new THREE.Mesh(textGeometry, textMaterial);
   textMesh.position.copy(position);
 
@@ -84,6 +76,7 @@ function createTextObject(text: string, position: THREE.Vector3, color: number) 
 const cubeGroup = new THREE.Group();
 
 const cubeMap = new Map<string, THREE.Mesh<THREE.BoxGeometry>>;
+const edgeMap = new Map<string, THREE.LineSegments>;
 
 const adjacentCubes: THREE.Mesh<THREE.BoxGeometry>[][][] = [];
 // Crie os cubos menores e adicione-os ao grupo
@@ -118,9 +111,10 @@ for (let i = 0; i < cubeCount; i++) {
         }
         sceneInit.setRotationFromQuaternion(textMesh);
         cubeGroup.add(textMesh);
-        edgesMesh.position.set(positionX, positionY, positionZ);
-        cubeGroup.add(edgesMesh);
       }
+      edgesMesh.position.set(positionX, positionY, positionZ);
+      cubeGroup.add(edgesMesh);
+      edgeMap.set(`${i}${j}${k}`, edgesMesh);
       cube.position.set(positionX, positionY, positionZ);
       cubeGroup.add(cube);
       cubeMap.set(`${i}${j}${k}`, cube);
@@ -137,13 +131,17 @@ sceneInit.scene.add(cubeGroup);
 sceneInit.scene.add(edgesMesh);
 
 let isDragging = 0;
-
+let ctrlPressed = false;
 window.addEventListener("keydown", event => {
-  if (event.ctrlKey)
+  if (event.ctrlKey) {
     window.addEventListener("mousemove", selectAdjacentCubes, false);
+    ctrlPressed = true;
+  }
 });
 window.addEventListener("keyup", () => {
+  if (!ctrlPressed) return;
   window.removeEventListener("mousemove", selectAdjacentCubes, false);
+  ctrlPressed = false;
 });
 window.addEventListener('mousedown', () => isDragging = 0);
 window.addEventListener('mousemove', () => isDragging++);
@@ -173,9 +171,13 @@ function leftClickCube(cube: any) {
   cubeGroup.remove(cube);
   if (!positionsToUncover) return;
   for (const position of positionsToUncover) {
-    const cubeToRemove = cubeMap.get(`${position.x}${position.y}${position.z}`)
+    const cubeToRemove = cubeMap.get(`${position.x}${position.y}${position.z}`);
     if (!cubeToRemove) continue;
     cubeGroup.remove(cubeToRemove);
+    if (mineSweeper.fields[position.x][position.y][position.z].adjacentMines !== 0) continue;
+    const edgeToRemove = edgeMap.get(`${position.x}${position.y}${position.z}`);
+    if (!edgeToRemove) continue;
+    cubeGroup.remove(edgeToRemove);
   }
   if (response.gameOver)
     alert(response.gameOver);
