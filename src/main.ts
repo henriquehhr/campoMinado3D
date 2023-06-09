@@ -53,23 +53,37 @@ const font = await sceneInit.loadFont(fontPath);
 // Crie uma função para criar um objeto de texto
 function createTextObject(text: string, position: THREE.Vector3, color: number) {
 
+  // Configurações do círculo
+  const raio = 0.11; // Raio do círculo
+  const segmentos = 20; // Número de segmentos do círculo
+  const anguloInicial = 0; // Ângulo inicial em radianos
+  const anguloCompleto = Math.PI * 2; // Ângulo completo em radianos
+  const geometriaCirculo = new THREE.CircleGeometry(raio, segmentos, anguloInicial, anguloCompleto);
+  const materialCirculo = new THREE.MeshBasicMaterial({ color: 0xff0000, transparent: true, opacity: 0 });
+  const circuloMesh = new THREE.Mesh(geometriaCirculo, materialCirculo);
+  circuloMesh.position.copy(position);
+
   const textMaterial = new THREE.MeshBasicMaterial({
     color: color,
     side: THREE.DoubleSide
   });
   const shapes = font.generateShapes(text, 0.17);
   const textGeometry = new THREE.ShapeGeometry(shapes);
-  textGeometry.computeBoundingBox();
-  if (textGeometry.boundingBox) {
-    const textWidth = textGeometry.boundingBox.max.x - textGeometry.boundingBox.min.x;
-    const textHeight = textGeometry.boundingBox.max.y - textGeometry.boundingBox.min.y;
-    textGeometry.translate(-0.5 * textWidth, 0, 0);
-    textGeometry.translate(0, -0.5 * textHeight, 0);
-  }
+  // textGeometry.computeBoundingBox();
+  // if (textGeometry.boundingBox) {
+  //   const textWidth = textGeometry.boundingBox.max.x - textGeometry.boundingBox.min.x;
+  //   const textHeight = textGeometry.boundingBox.max.y - textGeometry.boundingBox.min.y;
+  //   textGeometry.translate(-0.5 * textWidth, 0, 0);
+  //   textGeometry.translate(0, -0.5 * textHeight, 0);
+  // }
+  textGeometry.translate(-0.5 * raio, 0, 0);
+  textGeometry.translate(0, -0.5 * raio, 0);
   const textMesh = new THREE.Mesh(textGeometry, textMaterial);
-  textMesh.position.copy(position);
+  //textMesh.position.copy(position);
 
-  return textMesh;
+  circuloMesh.add(textMesh);
+
+  return circuloMesh;
 }
 
 // Crie um grupo para os cubos menores
@@ -180,7 +194,7 @@ function leftClickCube(cube: any) {
     cubeGroup.remove(edgeToRemove);
   }
   if (response.gameOver)
-    alert(response.gameOver);
+    setTimeout(() => alert(response.gameOver), 10);
 }
 function rightClickCube(cube: any) {
   const p = getFieldPosition(cube.position);
@@ -199,7 +213,7 @@ let lastIntersectedObject: THREE.Mesh | null = null;
 function selectAdjacentCubes(event: MouseEvent) {
   const intersects = sceneInit.getIntersectedObjects(event.clientX, event.clientY);
   for (const mesh of intersects) {
-    if (mesh.object.geometry instanceof THREE.ShapeGeometry)
+    if (mesh.object.geometry instanceof THREE.CircleGeometry)
       break;
     if (mesh.object.geometry instanceof THREE.BoxGeometry) {
       if (lastIntersectedObject)
@@ -207,7 +221,7 @@ function selectAdjacentCubes(event: MouseEvent) {
       return;
     }
   }
-  const { object: number } = intersects.find(shape => shape.object.geometry instanceof THREE.ShapeGeometry) ?? { object: null };
+  const { object: number } = intersects.find(shape => shape.object.geometry instanceof THREE.CircleGeometry) ?? { object: null };
 
   if (!number) {// está com o mouse fora do número ou saiu do número
     if (lastIntersectedObject)
@@ -219,6 +233,7 @@ function selectAdjacentCubes(event: MouseEvent) {
     if (lastIntersectedObject)
       changeColorOfAdjacentCubes(getFieldPosition(lastIntersectedObject.position), cubeColor);
     changeColorOfAdjacentCubes(getFieldPosition(number.position), selectedCubeColor);
+    //number.scale.multiplyScalar(2);
     lastIntersectedObject = number;
   } else {
     changeColorOfAdjacentCubes(getFieldPosition(number.position), selectedCubeColor);
