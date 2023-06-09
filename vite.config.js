@@ -6,7 +6,7 @@ export default defineConfig({
     polyfillDynamicImport: false,
     outDir: 'dist',
     rollupOptions: {
-      input: 'src/main.js',
+      input: 'src/main.ts',
     },
   },
 });
