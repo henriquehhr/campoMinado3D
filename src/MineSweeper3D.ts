@@ -75,6 +75,9 @@ export default class MineSweeper3D {
         this.fields[x][y][z].adjacentMines++;
       });
     });
+    this.mineFields.forEach(mine => {
+      this.fields[mine.x][mine.y][mine.z].adjacentMines = -1;
+    });
   }
 
   public flagAField(p: Position): FieldStatus {

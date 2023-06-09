@@ -4,7 +4,10 @@ import SceneInit from './SceneInit.js';
 import * as THREE from 'three';
 import { Position } from './types.js';
 
-const mineSweeper = new MineSweeper3D(6, 6, 6, 4);
+const x = 6;
+const y = 6;
+const z = 6;
+const mineSweeper = new MineSweeper3D(x, y, z, 4);
 const sceneInit = new SceneInit();
 
 // Tamanho e quantidade de cubos menores
@@ -94,8 +97,7 @@ for (let i = 0; i < cubeCount; i++) {
       const material = new THREE.MeshBasicMaterial({ color: cubeColor, transparent: false, opacity: 0.5 });
       const geometry = new THREE.BoxGeometry(cubeSize, cubeSize, cubeSize);
       const cube = new THREE.Mesh(geometry, material);
-      // Crie as arestas dos cubos menores
-      const edgeMaterial = new THREE.LineBasicMaterial({ color: edgeColor, transparent: true, opacity: 0.3 });
+      const edgeMaterial = new THREE.LineBasicMaterial({ color: edgeColor, transparent: true, opacity: 0.1 });
       const edges = new THREE.EdgesGeometry(geometry);
       const edgesMesh = new THREE.LineSegments(edges, edgeMaterial);
       adjacentCubes[i][j][k] = cube;
@@ -126,11 +128,15 @@ for (let i = 0; i < cubeCount; i++) {
   }
 }
 
-// Adicione o grupo de cubos à cena
-sceneInit.scene.add(cubeGroup);
+const geometry = new THREE.BoxGeometry((cubeSize + spacing) * x, (cubeSize + spacing) * y, (cubeSize + spacing) * z);
+const edgeMaterial = new THREE.LineBasicMaterial({ color: edgeColor, transparent: true, opacity: 0.1 });
+const edges = new THREE.EdgesGeometry(geometry);
+const edgesMesh = new THREE.LineSegments(edges, edgeMaterial);
 
-const clickMouse = new THREE.Vector2();
-let isDragging = false;
+sceneInit.scene.add(cubeGroup);
+sceneInit.scene.add(edgesMesh);
+
+let isDragging = 0;
 
 window.addEventListener("keydown", event => {
   if (event.ctrlKey)
@@ -139,11 +145,11 @@ window.addEventListener("keydown", event => {
 window.addEventListener("keyup", () => {
   window.removeEventListener("mousemove", selectAdjacentCubes, false);
 });
-window.addEventListener('mousedown', () => isDragging = false);
-window.addEventListener('mousemove', () => isDragging = true);
+window.addEventListener('mousedown', () => isDragging = 0);
+window.addEventListener('mousemove', () => isDragging++);
 window.addEventListener('mouseup', event => {
-  if (isDragging) {
-    isDragging = false;
+  if (isDragging > 5) {
+    isDragging = 0;
     return;
   }
   const intersects = sceneInit.getIntersectedObjects(event.clientX, event.clientY);
