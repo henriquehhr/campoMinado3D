@@ -30,11 +30,10 @@ const numberColor = [
 ];
 
 const cubeColor = 0x006655;
+const alternativeCubeColor = 0x005040;
 const flaggedCubeColor = 0xF73970;
-//@ts-ignore
-const alternativeCubeColor = 0x21ABCD;
+const alternativeFlaggedColor = 0xDD3050;
 const edgeColor = 0xFFFFFF;
-//@ts-ignore
 const selectedCubeColor = 0x224444;
 
 const adjacentFields: Position[] = [];
@@ -102,6 +101,7 @@ for (let i = 0; i < cubeCount; i++) {
     adjacentCubes[i].push(column);
     for (let k = cubeCount - 1; k >= 0; k--) {
       const material = new THREE.MeshBasicMaterial({ color: cubeColor, transparent: false, opacity: 0.5 });
+      // const material = new THREE.MeshNormalMaterial();
       const geometry = new THREE.BoxGeometry(cubeSize, cubeSize, cubeSize);
       const cube = new THREE.Mesh(geometry, material);
       const edgeMaterial = new THREE.LineBasicMaterial({ color: edgeColor, transparent: true, opacity: 0.1 });
@@ -218,7 +218,7 @@ function selectAdjacentCubes(event: MouseEvent) {
       break;
     if (mesh.object.geometry instanceof THREE.BoxGeometry) {
       if (lastIntersectedObject) {
-        changeColorOfAdjacentCubes(getFieldPosition(lastIntersectedObject.position), cubeColor);
+        changeColorOfAdjacentCubes(getFieldPosition(lastIntersectedObject.position), false);
         //@ts-ignore
         lastIntersectedObject.material.opacity = 0;
       }
@@ -229,7 +229,7 @@ function selectAdjacentCubes(event: MouseEvent) {
 
   if (!number) {// está com o mouse fora do número ou saiu do número
     if (lastIntersectedObject) {
-      changeColorOfAdjacentCubes(getFieldPosition(lastIntersectedObject.position), cubeColor);
+      changeColorOfAdjacentCubes(getFieldPosition(lastIntersectedObject.position), false);
       //@ts-ignore
       lastIntersectedObject.material.opacity = 0;
     }
@@ -238,29 +238,31 @@ function selectAdjacentCubes(event: MouseEvent) {
   }
   if (lastIntersectedObject !== number) { //acabou de entrar no número
     if (lastIntersectedObject) {
-      changeColorOfAdjacentCubes(getFieldPosition(lastIntersectedObject.position), cubeColor);
+      changeColorOfAdjacentCubes(getFieldPosition(lastIntersectedObject.position), false);
       //@ts-ignore
       lastIntersectedObject.material.opacity = 0;
     }
-    changeColorOfAdjacentCubes(getFieldPosition(number.position), selectedCubeColor);
+    changeColorOfAdjacentCubes(getFieldPosition(number.position), true);
     //@ts-ignore
     number.material.opacity = opacity;
     //number.scale.multiplyScalar(2);
     lastIntersectedObject = number;
   } else {
-    changeColorOfAdjacentCubes(getFieldPosition(number.position), selectedCubeColor);
+    changeColorOfAdjacentCubes(getFieldPosition(number.position), true);
     //@ts-ignore
     number.material.opacity = opacity;
   }
 }
 
-function changeColorOfAdjacentCubes(p: Position, color: number) {
+function changeColorOfAdjacentCubes(p: Position, select: boolean) {
   for (const a of adjacentFields) {
     if (!adjacentCubes[p.x + a.x]) continue;
     if (!adjacentCubes[p.x + a.x][p.y + a.y]) continue;
     if (!adjacentCubes[p.x + a.x][p.y + a.y][p.z + a.z]) continue;
+    const color = mineSweeper.fields[p.x + a.x][p.y + a.y][p.z + a.z].status == 'flagged' ? flaggedCubeColor : cubeColor;
+    const alternativeColor = mineSweeper.fields[p.x + a.x][p.y + a.y][p.z + a.z].status == 'flagged' ? alternativeFlaggedColor : alternativeCubeColor;
     //@ts-ignore
-    adjacentCubes[p.x + a.x][p.y + a.y][p.z + a.z].material.color.set(color);
+    adjacentCubes[p.x + a.x][p.y + a.y][p.z + a.z].material.color.set(select ? alternativeColor : color);
   }
 }
 //function leftAndRightClickCube(intersect: THREE.Intersection[]) { }

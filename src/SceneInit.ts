@@ -13,6 +13,9 @@ export default class SceneInit {
   nearPlane = 0.1;
   farPlane = 1000;
 
+  // ambientLight: THREE.AmbientLight;
+  // directionalLight: THREE.DirectionalLight;
+
   // NOTE: Additional components.
   controls: TrackballControls;
   quaternion: THREE.Quaternion;
@@ -31,6 +34,16 @@ export default class SceneInit {
     );
     this.camera.position.z = 5;
     this.camera.updateProjectionMatrix();
+
+    // this.ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+    // this.ambientLight.castShadow = true;
+    // this.scene.add(this.ambientLight);
+
+    // // directional light - parallel sun rays
+    // this.directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+    // // this.directionalLight.castShadow = true;
+    // this.directionalLight.position.set(0, 32, 64);
+    // this.scene.add(this.directionalLight);
 
     this.renderer = new THREE.WebGLRenderer({ antialias: true });
     this.renderer.setSize(window.innerWidth, window.innerHeight);
