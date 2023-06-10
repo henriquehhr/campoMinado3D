@@ -11,7 +11,7 @@ const mineSweeper = new MineSweeper3D(x, y, z, 12);
 const sceneInit = new SceneInit();
 
 // Tamanho e quantidade de cubos menores
-const cubeSize = 0.4;
+const cubeSize = 0.5;
 const cubeCount = mineSweeper.x;
 
 // Espaço vazio entre os cubos
@@ -29,12 +29,49 @@ const numberColor = [
   0x757575
 ];
 
-const cubeColor = 0x006655;
-const alternativeCubeColor = 0x005040;
-const flaggedCubeColor = 0xF73970;
-const alternativeFlaggedColor = 0xDD3050;
+const materials = [
+  new THREE.MeshBasicMaterial({ color: 0xCFCFCF }),
+  new THREE.MeshBasicMaterial({ color: 0xCFCFCF }),
+  new THREE.MeshBasicMaterial({ color: 0x807C7D }),
+  new THREE.MeshBasicMaterial({ color: 0x807C7D }),
+  new THREE.MeshBasicMaterial({ color: 0xB9B6B7 }),
+  new THREE.MeshBasicMaterial({ color: 0xB9B6B7 }),
+];
+
+const flaggedMaterial = [
+  new THREE.MeshBasicMaterial({ color: 0xDCAFAC }),
+  new THREE.MeshBasicMaterial({ color: 0xDCAFAC }),
+  new THREE.MeshBasicMaterial({ color: 0xCDA098 }),
+  new THREE.MeshBasicMaterial({ color: 0xCDA098 }),
+  new THREE.MeshBasicMaterial({ color: 0xAA7F79 }),
+  new THREE.MeshBasicMaterial({ color: 0xAA7F79 }),
+];
+
+const selectedMaterial = [
+  new THREE.MeshBasicMaterial({ color: 0xbbb3ff }),
+  new THREE.MeshBasicMaterial({ color: 0xbbb3ff }),
+  new THREE.MeshBasicMaterial({ color: 0x6868a7 }),
+  new THREE.MeshBasicMaterial({ color: 0x6868a7 }),
+  new THREE.MeshBasicMaterial({ color: 0x9391ed }),
+  new THREE.MeshBasicMaterial({ color: 0x9391ed }),
+];
+
+const selectedFlagged = [
+  new THREE.MeshBasicMaterial({ color: 0xff9c8e }),
+  new THREE.MeshBasicMaterial({ color: 0xff9c8e }),
+  new THREE.MeshBasicMaterial({ color: 0xd98c7e }),
+  new THREE.MeshBasicMaterial({ color: 0xd98c7e }),
+  new THREE.MeshBasicMaterial({ color: 0xb55651 }),
+  new THREE.MeshBasicMaterial({ color: 0xb55651 }),
+];
+
+
+// const cubeColor = 0x006655;
+// const alternativeCubeColor = 0x005040;
+// const flaggedCubeColor = 0xF73970;
+// const alternativeFlaggedColor = 0xDD3050;
+// const selectedCubeColor = 0x224444;
 const edgeColor = 0xFFFFFF;
-const selectedCubeColor = 0x224444;
 
 const adjacentFields: Position[] = [];
 for (let i = -1; i <= 1; i++) {
@@ -105,11 +142,11 @@ for (let i = 0; i < cubeCount; i++) {
     const column: Array<any> = [];
     cubes[i].push(column);
     for (let k = cubeCount - 1; k >= 0; k--) {
-      const material = new THREE.MeshBasicMaterial({ color: cubeColor, transparent: false, opacity: 0.5 });
+      //const material = new THREE.MeshBasicMaterial({ color: cubeColor, transparent: false, opacity: 0.5 });
       // const material = new THREE.MeshNormalMaterial();
       const geometry = new THREE.BoxGeometry(cubeSize, cubeSize, cubeSize);
-      const cube = new THREE.Mesh(geometry, material);
-      const edgeMaterial = new THREE.LineBasicMaterial({ color: edgeColor, transparent: true, opacity: 0.1 });
+      const cube = new THREE.Mesh(geometry, materials);
+      const edgeMaterial = new THREE.LineBasicMaterial({ color: edgeColor, transparent: false, opacity: 0.1 });
       const edges = new THREE.EdgesGeometry(geometry);
       const edgesMesh = new THREE.LineSegments(edges, edgeMaterial);
 
@@ -146,12 +183,12 @@ for (let i = 0; i < cubeCount; i++) {
 }
 
 // const geometry = new THREE.BoxGeometry((cubeSize + spacing) * x, (cubeSize + spacing) * y, (cubeSize + spacing) * z);
-// const edgeMaterial = new THREE.LineBasicMaterial({ color: edgeColor, transparent: true, opacity: 0.1 });
+// const edgeMaterial = new THREE.LineBasicMaterial({ color: edgeColor, transparent: false, opacity: 0.1 });
 // const edges = new THREE.EdgesGeometry(geometry);
 // const edgesMesh = new THREE.LineSegments(edges, edgeMaterial);
+// sceneInit.scene.add(edgesMesh);
 
 sceneInit.scene.add(cubeGroup);
-// sceneInit.scene.add(edgesMesh);
 
 let isDragging = 0;
 let ctrlPressed = false;
@@ -185,7 +222,7 @@ window.addEventListener('mouseup', event => {
   }
 });
 
-function leftClickCube(cube: any) {
+function leftClickCube(cube: any) { //TODO renderizar números somente quando descobertos
   //reduceCube(cube);
   const p = getFieldPosition(cube.position);
   const response = mineSweeper.clickField(p);
@@ -197,7 +234,7 @@ function leftClickCube(cube: any) {
     const cubeToRemove = cubes[x][y][z].mesh;
     if (!cubeToRemove) continue;
     cubeGroup.remove(cubeToRemove);
-    if (cubes[x][y][z].field.adjacentMines !== 0) continue;
+    //if (cubes[x][y][z].field.adjacentMines > 0) continue;
     const edgeToRemove = cubes[x][y][z].edge
     if (!edgeToRemove) continue;
     cubeGroup.remove(edgeToRemove);
@@ -211,12 +248,12 @@ function rightClickCube(cube: any) {
   const selected = cubes[p.x][p.y][p.z].selected;
   let color;
   if (status == 'flagged')
-    color = selected ? alternativeFlaggedColor : flaggedCubeColor;
+    color = selected ? selectedFlagged : flaggedMaterial;
   else if (status == 'covered')
-    color = selected ? alternativeCubeColor : cubeColor;
+    color = selected ? selectedMaterial : materials;
   if (status != 'uncovered') {
     //@ts-ignore
-    cube.material.color.set(color);
+    cube.material = color;
   };
 }
 
@@ -269,10 +306,10 @@ function changeColorOfAdjacentCubes(p: Position, select: boolean) {
     if (!cubes[p.x + a.x]) continue;
     if (!cubes[p.x + a.x][p.y + a.y]) continue;
     if (!cubes[p.x + a.x][p.y + a.y][p.z + a.z]) continue;
-    const color = mineSweeper.fields[p.x + a.x][p.y + a.y][p.z + a.z].status == 'flagged' ? flaggedCubeColor : cubeColor;
-    const alternativeColor = mineSweeper.fields[p.x + a.x][p.y + a.y][p.z + a.z].status == 'flagged' ? alternativeFlaggedColor : alternativeCubeColor;
+    const color = mineSweeper.fields[p.x + a.x][p.y + a.y][p.z + a.z].status == 'flagged' ? flaggedMaterial : materials;
+    const alternativeColor = mineSweeper.fields[p.x + a.x][p.y + a.y][p.z + a.z].status == 'flagged' ? selectedFlagged : selectedMaterial;
     //@ts-ignore
-    cubes[p.x + a.x][p.y + a.y][p.z + a.z].mesh.material.color.set(select ? alternativeColor : color);
+    cubes[p.x + a.x][p.y + a.y][p.z + a.z].mesh.material = (select ? alternativeColor : color);
     cubes[p.x + a.x][p.y + a.y][p.z + a.z].selected = select;
   }
 }

@@ -93,9 +93,9 @@ export default class MineSweeper3D {
     const response: ClickResponse = {
       fieldsToUncover: []
     };
-    if (this.firstClick && this.fields[p.x][p.y][p.z].mine)
-      this.changePositionOfFirstMine(p);
-    this.firstClick = false;
+    // if (this.firstClick && this.fields[p.x][p.y][p.z].mine)
+    //   this.changePositionOfFirstMine(p);
+    // this.firstClick = false;
     if (this.gameOver)
       return response;
     response.fieldsToUncover = this.uncoverField(p);
@@ -117,7 +117,7 @@ export default class MineSweeper3D {
     return response;
   }
 
-  private changePositionOfFirstMine(p: Position) {
+  private changePositionOfFirstMine(p: Position) { //TODO arrumar função.
     let temp: Position;
     let mineAlreadyExistsInThisPosition: boolean;
     do {
