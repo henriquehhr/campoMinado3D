@@ -2,7 +2,7 @@ import MineSweeper3D from './MineSweeper3D.js';
 import SceneInit from './SceneInit.js';
 
 import * as THREE from 'three';
-import { Position } from './types.js';
+import { Field, Position } from './types.js';
 
 const x = 6;
 const y = 6;
@@ -88,17 +88,22 @@ function createTextObject(text: string, position: THREE.Vector3, color: number) 
 // Crie um grupo para os cubos menores
 const cubeGroup = new THREE.Group();
 
-const cubeMap = new Map<string, THREE.Mesh<THREE.BoxGeometry>>;
-const edgeMap = new Map<string, THREE.LineSegments>;
+interface Cube {
+  field: Field;
+  selected: boolean;
+  mesh: THREE.Mesh<THREE.BoxGeometry>;
+  edge: THREE.LineSegments;
+}
 
-const adjacentCubes: THREE.Mesh<THREE.BoxGeometry>[][][] = [];
+const cubes: Cube[][][] = [];
+
 // Crie os cubos menores e adicione-os ao grupo
 for (let i = 0; i < cubeCount; i++) {
   const line: Array<any> = [];
-  adjacentCubes.push(line);
+  cubes.push(line);
   for (let j = 0; j < cubeCount; j++) {
     const column: Array<any> = [];
-    adjacentCubes[i].push(column);
+    cubes[i].push(column);
     for (let k = cubeCount - 1; k >= 0; k--) {
       const material = new THREE.MeshBasicMaterial({ color: cubeColor, transparent: false, opacity: 0.5 });
       // const material = new THREE.MeshNormalMaterial();
@@ -107,7 +112,6 @@ for (let i = 0; i < cubeCount; i++) {
       const edgeMaterial = new THREE.LineBasicMaterial({ color: edgeColor, transparent: true, opacity: 0.1 });
       const edges = new THREE.EdgesGeometry(geometry);
       const edgesMesh = new THREE.LineSegments(edges, edgeMaterial);
-      adjacentCubes[i][j][k] = cube;
 
       const positionX = (i - cubeCount / 2) * (cubeSize + spacing) + (cubeSize + spacing) / 2;
       const positionY = (j - cubeCount / 2) * (cubeSize + spacing) + (cubeSize + spacing) / 2;
@@ -128,10 +132,15 @@ for (let i = 0; i < cubeCount; i++) {
       }
       edgesMesh.position.set(positionX, positionY, positionZ);
       cubeGroup.add(edgesMesh);
-      edgeMap.set(`${i}${j}${k}`, edgesMesh);
       cube.position.set(positionX, positionY, positionZ);
       cubeGroup.add(cube);
-      cubeMap.set(`${i}${j}${k}`, cube);
+
+      cubes[i][j][k] = {
+        field: mineSweeper.fields[i][j][k],
+        selected: false,
+        mesh: cube,
+        edge: edgesMesh
+      };
     }
   }
 }
@@ -184,12 +193,12 @@ function leftClickCube(cube: any) {
   if (positionsToUncover?.length == 0) return;
   cubeGroup.remove(cube);
   if (!positionsToUncover) return;
-  for (const position of positionsToUncover) {
-    const cubeToRemove = cubeMap.get(`${position.x}${position.y}${position.z}`);
+  for (const { x, y, z } of positionsToUncover) {
+    const cubeToRemove = cubes[x][y][z].mesh;
     if (!cubeToRemove) continue;
     cubeGroup.remove(cubeToRemove);
-    if (mineSweeper.fields[position.x][position.y][position.z].adjacentMines !== 0) continue;
-    const edgeToRemove = edgeMap.get(`${position.x}${position.y}${position.z}`);
+    if (cubes[x][y][z].field.adjacentMines !== 0) continue;
+    const edgeToRemove = cubes[x][y][z].edge
     if (!edgeToRemove) continue;
     cubeGroup.remove(edgeToRemove);
   }
@@ -199,14 +208,16 @@ function leftClickCube(cube: any) {
 function rightClickCube(cube: any) {
   const p = getFieldPosition(cube.position);
   const status = mineSweeper.flagAField(p);
+  const selected = cubes[p.x][p.y][p.z].selected;
   let color;
   if (status == 'flagged')
-    color = flaggedCubeColor;
+    color = selected ? alternativeFlaggedColor : flaggedCubeColor;
   else if (status == 'covered')
-    color = cubeColor;
-  if (status != 'uncovered')
+    color = selected ? alternativeCubeColor : cubeColor;
+  if (status != 'uncovered') {
     //@ts-ignore
     cube.material.color.set(color);
+  };
 }
 
 let lastIntersectedObject: THREE.Mesh | null = null;
@@ -226,7 +237,6 @@ function selectAdjacentCubes(event: MouseEvent) {
     }
   }
   const { object: number } = intersects.find(shape => shape.object.geometry instanceof THREE.CircleGeometry) ?? { object: null };
-
   if (!number) {// está com o mouse fora do número ou saiu do número
     if (lastIntersectedObject) {
       changeColorOfAdjacentCubes(getFieldPosition(lastIntersectedObject.position), false);
@@ -256,13 +266,14 @@ function selectAdjacentCubes(event: MouseEvent) {
 
 function changeColorOfAdjacentCubes(p: Position, select: boolean) {
   for (const a of adjacentFields) {
-    if (!adjacentCubes[p.x + a.x]) continue;
-    if (!adjacentCubes[p.x + a.x][p.y + a.y]) continue;
-    if (!adjacentCubes[p.x + a.x][p.y + a.y][p.z + a.z]) continue;
+    if (!cubes[p.x + a.x]) continue;
+    if (!cubes[p.x + a.x][p.y + a.y]) continue;
+    if (!cubes[p.x + a.x][p.y + a.y][p.z + a.z]) continue;
     const color = mineSweeper.fields[p.x + a.x][p.y + a.y][p.z + a.z].status == 'flagged' ? flaggedCubeColor : cubeColor;
     const alternativeColor = mineSweeper.fields[p.x + a.x][p.y + a.y][p.z + a.z].status == 'flagged' ? alternativeFlaggedColor : alternativeCubeColor;
     //@ts-ignore
-    adjacentCubes[p.x + a.x][p.y + a.y][p.z + a.z].material.color.set(select ? alternativeColor : color);
+    cubes[p.x + a.x][p.y + a.y][p.z + a.z].mesh.material.color.set(select ? alternativeColor : color);
+    cubes[p.x + a.x][p.y + a.y][p.z + a.z].selected = select;
   }
 }
 //function leftAndRightClickCube(intersect: THREE.Intersection[]) { }
