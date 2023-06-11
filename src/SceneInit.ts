@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import * as TWEEN from '@tweenjs/tween.js';
 import { TrackballControls } from 'three/addons/controls/TrackballControls.js';
 import { FontLoader, Font } from 'three/examples/jsm/loaders/FontLoader.js';
 
@@ -12,9 +13,6 @@ export default class SceneInit {
   fov = 65;
   nearPlane = 0.1;
   farPlane = 1000;
-
-  // ambientLight: THREE.AmbientLight;
-  // directionalLight: THREE.DirectionalLight;
 
   // NOTE: Additional components.
   controls: TrackballControls;
@@ -35,16 +33,6 @@ export default class SceneInit {
     this.camera.position.z = 5;
     this.camera.updateProjectionMatrix();
 
-    // this.ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
-    // this.ambientLight.castShadow = true;
-    // this.scene.add(this.ambientLight);
-
-    // // directional light - parallel sun rays
-    // this.directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-    // // this.directionalLight.castShadow = true;
-    // this.directionalLight.position.set(0, 32, 64);
-    // this.scene.add(this.directionalLight);
-
     this.renderer = new THREE.WebGLRenderer({ antialias: true });
     this.renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(this.renderer.domElement);
@@ -56,6 +44,8 @@ export default class SceneInit {
     this.position = new THREE.Vector2();
 
     window.addEventListener('resize', () => this.onWindowResize(), false);
+
+    this.startRotationAnimation();
   }
 
   public loadFont(fontPath: string): Promise<Font> {
@@ -80,10 +70,26 @@ export default class SceneInit {
 
   public animate() {
     window.requestAnimationFrame(this.animate.bind(this));
+    TWEEN.update();
     this.controls.update();
     this.camera.getWorldQuaternion(this.quaternion);
     this.rotateWithCamera.forEach(obj => obj.setRotationFromQuaternion(this.quaternion));
     this.renderer.render(this.scene, this.camera);
+  }
+
+  private startRotationAnimation() {
+    const rotation = { x: 0, y: 0, z: 0 };
+    const scene = this.scene;
+
+    const tween = new TWEEN.Tween(rotation)
+      .to({ x: Math.PI / 3, y: Math.PI / 3, z: Math.PI / 3 }, 3000)
+      .easing(TWEEN.Easing.Quadratic.Out)
+      .onUpdate(function () {
+        scene.rotation.x = rotation.x;
+        scene.rotation.y = rotation.y;
+        scene.rotation.z = rotation.z;
+      })
+      .start();
   }
 
   private onWindowResize() {

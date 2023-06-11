@@ -86,7 +86,6 @@ const fontPath = 'assets/helvetiker_regular.typeface.json';
 const font = await sceneInit.loadFont(fontPath);
 
 const minePicture = new THREE.TextureLoader().load('assets/explosão2.png');
-console.log(minePicture)
 function createTextObject(text: string, position: THREE.Vector3, color: number) {
 
   // Configurações do círculo
