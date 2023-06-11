@@ -86,7 +86,8 @@ for (let i = -1; i <= 1; i++) {
 const fontPath = 'assets/helvetiker_regular.typeface.json';
 const font = await sceneInit.loadFont(fontPath);
 
-// Crie uma função para criar um objeto de texto
+const minePicture = new THREE.TextureLoader().load('assets/explosão2.png');
+console.log(minePicture)
 function createTextObject(text: string, position: THREE.Vector3, color: number) {
 
   // Configurações do círculo
@@ -94,9 +95,9 @@ function createTextObject(text: string, position: THREE.Vector3, color: number) 
   const segmentos = 20; // Número de segmentos do círculo
   const anguloInicial = 0; // Ângulo inicial em radianos
   const anguloCompleto = Math.PI * 2; // Ângulo completo em radianos
-  const geometriaCirculo = new THREE.CircleGeometry(raio, segmentos, anguloInicial, anguloCompleto);
-  const materialCirculo = new THREE.MeshBasicMaterial({ color: 0xFFFFFF, transparent: true, opacity: 0 });
-  const circuloMesh = new THREE.Mesh(geometriaCirculo, materialCirculo);
+  let geometriaCirculo = new THREE.CircleGeometry(raio, segmentos, anguloInicial, anguloCompleto);
+  let materialCirculo = new THREE.MeshBasicMaterial({ color: 0xFFFFFF, transparent: true, opacity: 0 });
+  let circuloMesh = new THREE.Mesh(geometriaCirculo, materialCirculo);
   circuloMesh.position.copy(position);
 
   const textMaterial = new THREE.MeshBasicMaterial({
@@ -119,10 +120,17 @@ function createTextObject(text: string, position: THREE.Vector3, color: number) 
 
   circuloMesh.add(textMesh);
 
+  if (text == 'X') {
+    geometriaCirculo = new THREE.CircleGeometry(raio + 0.08, segmentos, anguloInicial, anguloCompleto);
+    materialCirculo = new THREE.MeshBasicMaterial({ color: 0xFFFFFF, transparent: true, opacity: 0.9 });
+    materialCirculo.map = minePicture;
+    circuloMesh = new THREE.Mesh(geometriaCirculo, materialCirculo);
+    circuloMesh.position.copy(position);
+  }
+
   return circuloMesh;
 }
 
-// Crie um grupo para os cubos menores
 const cubeGroup = new THREE.Group();
 
 interface Cube {
