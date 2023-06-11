@@ -85,7 +85,8 @@ for (let i = -1; i <= 1; i++) {
 const fontPath = 'assets/helvetiker_regular.typeface.json';
 const font = await sceneInit.loadFont(fontPath);
 
-const minePicture = new THREE.TextureLoader().load('assets/explosão2.png');
+const explosionPicture = new THREE.TextureLoader().load('assets/explosão2.png');
+const minePicture = new THREE.TextureLoader().load('assets/mine2.webp');
 function createTextObject(text: string, position: THREE.Vector3, color: number) {
 
   const raio = 0.11;
@@ -117,10 +118,10 @@ function createTextObject(text: string, position: THREE.Vector3, color: number) 
 
   circuloMesh.add(textMesh);
 
-  if (text == 'X') {
+  if (text === 'X' || text === 'x') {
     geometriaCirculo = new THREE.CircleGeometry(raio + 0.08, segmentos, anguloInicial, anguloCompleto);
     materialCirculo = new THREE.MeshBasicMaterial({ color: 0xFFFFFF, transparent: true, opacity: 0.9 });
-    materialCirculo.map = minePicture;
+    materialCirculo.map = text === 'X' ? explosionPicture : minePicture;
     circuloMesh = new THREE.Mesh(geometriaCirculo, materialCirculo);
     circuloMesh.position.copy(position);
   }
@@ -230,8 +231,17 @@ function leftClickCube(cube: any) { //TODO renderizar números somente quando de
     if (!edgeToRemove) continue;
     cubeGroup.remove(edgeToRemove);
   }
-  if (response.gameOver)
+  if (response.gameOver) {
     setTimeout(() => alert(response.gameOver), 10);
+    if (!response.mineFields) return;
+    for (const { x, y, z } of response.mineFields) {
+      if (p.x === x && p.y === y && p.z === z) continue;
+      renderMine(x, y, z, false);
+      const cubeToRemove = cubes[x][y][z].mesh;
+      if (!cubeToRemove) continue;
+      cubeGroup.remove(cubeToRemove);
+    }
+  }
 }
 function rightClickCube(cube: any) {
   const p = getFieldPosition(cube.position);
@@ -246,6 +256,15 @@ function rightClickCube(cube: any) {
     //@ts-ignore
     cube.material = color;
   };
+}
+
+function renderMine(i: number, j: number, k: number, revelead: boolean) {
+  const positionX = (i - x / 2) * (cubeSize + spacing) + (cubeSize + spacing) / 2;
+  const positionY = (j - y / 2) * (cubeSize + spacing) + (cubeSize + spacing) / 2;
+  const positionZ = (k - z / 2) * (cubeSize + spacing) + (cubeSize + spacing) / 2;
+  const textMesh = createTextObject('x', new THREE.Vector3(positionX, positionY, positionZ), 0xFFc0cb);
+  sceneInit.setRotationFromQuaternion(textMesh);
+  cubeGroup.add(textMesh);
 }
 
 function renderNumberOfAdjacentMines(i: number, j: number, k: number, adjacentMines: number, mine: boolean) {

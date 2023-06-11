@@ -110,8 +110,10 @@ export default class MineSweeper3D {
         }
       }
     }
-    if (gameLoss)
+    if (gameLoss) {
       response.gameOver = 'loss';
+      response.mineFields = this.mineFields;
+    }
     if (response.gameOver)
       this.gameOver = true;
     return response;

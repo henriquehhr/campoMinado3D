@@ -17,4 +17,5 @@ export type FieldToUncover = Position & Field;
 export interface ClickResponse {
   fieldsToUncover: FieldToUncover[];
   gameOver?: 'win' | 'loss';
+  mineFields?: Position[];
 }
