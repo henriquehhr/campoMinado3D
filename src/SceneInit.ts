@@ -22,7 +22,7 @@ export default class SceneInit {
   raycaster: THREE.Raycaster;
   position: THREE.Vector2;
 
-  constructor() {
+  constructor(canvasID: string) {
     this.scene = new THREE.Scene();
     this.camera = new THREE.PerspectiveCamera(
       this.fov,
@@ -33,7 +33,9 @@ export default class SceneInit {
     this.camera.position.z = 5;
     this.camera.updateProjectionMatrix();
 
-    this.renderer = new THREE.WebGLRenderer({ antialias: true });
+    const canvas = document.getElementById(canvasID);
+    if (!canvas) throw new Error("Canvas not found");
+    this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
     this.renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(this.renderer.domElement);
 
@@ -45,7 +47,7 @@ export default class SceneInit {
 
     window.addEventListener('resize', () => this.onWindowResize(), false);
 
-    this.startRotationAnimation();
+    // this.startRotationAnimation();
   }
 
   public loadFont(fontPath: string): Promise<Font> {

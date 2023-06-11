@@ -1,4 +1,4 @@
-import { Field, Position, FieldStatus, ClickResponse } from "./types";
+import { Field, Position, FieldStatus, ClickResponse, FieldToUncover } from "./types";
 import { random } from "./utils";
 
 export default class MineSweeper3D {
@@ -154,7 +154,7 @@ export default class MineSweeper3D {
     });
   }
 
-  private uncoverField(p: Position): Position[] {
+  private uncoverField(p: Position): FieldToUncover[] {
     const field = this.fields[p.x][p.y][p.z];
     if (field.status == 'flagged' || field.status == 'uncovered') return [];
     field.status = 'uncovered';
@@ -162,13 +162,13 @@ export default class MineSweeper3D {
       this.coveredSafeFields--;
     if (field.adjacentMines === 0) {
       const adjacents = this.uncoverAdjacentFields(p);
-      return [p, ...adjacents];
+      return [{ ...p, ...field }, ...adjacents];
     }
-    return [p];
+    return [{ ...p, ...field }];
   }
 
-  private uncoverAdjacentFields(p: Position): Position[] {
-    let uncoveredFields: Position[] = [];
+  private uncoverAdjacentFields(p: Position): FieldToUncover[] {
+    let uncoveredFields: any[] = [];
     let x, y, z;
     for (const adjacent of this.adjacentFields) {
       x = p.x + adjacent.x;

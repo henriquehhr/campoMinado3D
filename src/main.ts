@@ -2,13 +2,13 @@ import MineSweeper3D from './MineSweeper3D.js';
 import SceneInit from './SceneInit.js';
 
 import * as THREE from 'three';
-import { Field, Position } from './types.js';
+import { Position } from './types.js';
 
 const x = 6;
 const y = 6;
 const z = 6;
 const mineSweeper = new MineSweeper3D(x, y, z, 12);
-const sceneInit = new SceneInit();
+const sceneInit = new SceneInit('container');
 
 // Tamanho e quantidade de cubos menores
 const cubeSize = 0.5;
@@ -88,11 +88,10 @@ const font = await sceneInit.loadFont(fontPath);
 const minePicture = new THREE.TextureLoader().load('assets/explosão2.png');
 function createTextObject(text: string, position: THREE.Vector3, color: number) {
 
-  // Configurações do círculo
-  const raio = 0.11; // Raio do círculo
-  const segmentos = 20; // Número de segmentos do círculo
-  const anguloInicial = 0; // Ângulo inicial em radianos
-  const anguloCompleto = Math.PI * 2; // Ângulo completo em radianos
+  const raio = 0.11;
+  const segmentos = 20;
+  const anguloInicial = 0;
+  const anguloCompleto = Math.PI * 2;
   let geometriaCirculo = new THREE.CircleGeometry(raio, segmentos, anguloInicial, anguloCompleto);
   let materialCirculo = new THREE.MeshBasicMaterial({ color: 0xFFFFFF, transparent: true, opacity: 0 });
   let circuloMesh = new THREE.Mesh(geometriaCirculo, materialCirculo);
@@ -132,7 +131,6 @@ function createTextObject(text: string, position: THREE.Vector3, color: number) 
 const cubeGroup = new THREE.Group();
 
 interface Cube {
-  field: Field;
   selected: boolean;
   mesh: THREE.Mesh<THREE.BoxGeometry>;
   edge: THREE.LineSegments;
@@ -160,26 +158,12 @@ for (let i = 0; i < x; i++) {
       const positionY = (j - y / 2) * (cubeSize + spacing) + (cubeSize + spacing) / 2;
       const positionZ = (k - z / 2) * (cubeSize + spacing) + (cubeSize + spacing) / 2;
 
-      const adjacentMines = mineSweeper.fields[i][j][k].adjacentMines;
-      const isMine = mineSweeper.fields[i][j][k].mine;
-      if (adjacentMines > 0 || isMine) {
-        let textMesh: THREE.Mesh;
-        if (!isMine) {
-          textMesh = createTextObject('' + adjacentMines, new THREE.Vector3(positionX, positionY, positionZ), numberColor[adjacentMines]);
-        }
-        else {
-          textMesh = createTextObject('X', new THREE.Vector3(positionX, positionY, positionZ), 0xFFc0cb)
-        }
-        sceneInit.setRotationFromQuaternion(textMesh);
-        cubeGroup.add(textMesh);
-      }
       edgesMesh.position.set(positionX, positionY, positionZ);
       cubeGroup.add(edgesMesh);
       cube.position.set(positionX, positionY, positionZ);
       cubeGroup.add(cube);
 
       cubes[i][j][k] = {
-        field: mineSweeper.fields[i][j][k],
         selected: false,
         mesh: cube,
         edge: edgesMesh
@@ -236,7 +220,8 @@ function leftClickCube(cube: any) { //TODO renderizar números somente quando de
   if (positionsToUncover?.length == 0) return;
   cubeGroup.remove(cube);
   if (!positionsToUncover) return;
-  for (const { x, y, z } of positionsToUncover) {
+  for (const { x, y, z, adjacentMines, mine } of positionsToUncover) {
+    renderNumberOfAdjacentMines(x, y, z, adjacentMines, mine);
     const cubeToRemove = cubes[x][y][z].mesh;
     if (!cubeToRemove) continue;
     cubeGroup.remove(cubeToRemove);
@@ -261,6 +246,22 @@ function rightClickCube(cube: any) {
     //@ts-ignore
     cube.material = color;
   };
+}
+
+function renderNumberOfAdjacentMines(i: number, j: number, k: number, adjacentMines: number, mine: boolean) {
+  if (adjacentMines === 0 && !mine) return;
+  const positionX = (i - x / 2) * (cubeSize + spacing) + (cubeSize + spacing) / 2;
+  const positionY = (j - y / 2) * (cubeSize + spacing) + (cubeSize + spacing) / 2;
+  const positionZ = (k - z / 2) * (cubeSize + spacing) + (cubeSize + spacing) / 2;
+  let textMesh: THREE.Mesh;
+  if (!mine) {
+    textMesh = createTextObject('' + adjacentMines, new THREE.Vector3(positionX, positionY, positionZ), numberColor[adjacentMines]);
+  }
+  else {
+    textMesh = createTextObject('X', new THREE.Vector3(positionX, positionY, positionZ), 0xFFc0cb)
+  }
+  sceneInit.setRotationFromQuaternion(textMesh);
+  cubeGroup.add(textMesh);
 }
 
 let lastIntersectedObject: THREE.Mesh | null = null;

@@ -1,4 +1,4 @@
-export interface Position {
+export type Position = {
   x: number;
   y: number;
   z: number;
@@ -6,13 +6,15 @@ export interface Position {
 
 export type FieldStatus = 'covered' | 'uncovered' | 'flagged';
 
-export interface Field {
+export type Field = {
   status: FieldStatus,
   mine: boolean,
   adjacentMines: number
 }
 
+export type FieldToUncover = Position & Field;
+
 export interface ClickResponse {
-  fieldsToUncover: Position[];
+  fieldsToUncover: FieldToUncover[];
   gameOver?: 'win' | 'loss';
 }
