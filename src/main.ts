@@ -12,7 +12,6 @@ const sceneInit = new SceneInit();
 
 // Tamanho e quantidade de cubos menores
 const cubeSize = 0.5;
-const cubeCount = mineSweeper.x;
 
 // Espaço vazio entre os cubos
 const spacing = 0;
@@ -143,13 +142,13 @@ interface Cube {
 const cubes: Cube[][][] = [];
 
 // Crie os cubos menores e adicione-os ao grupo
-for (let i = 0; i < cubeCount; i++) {
+for (let i = 0; i < x; i++) {
   const line: Array<any> = [];
   cubes.push(line);
-  for (let j = 0; j < cubeCount; j++) {
+  for (let j = 0; j < y; j++) {
     const column: Array<any> = [];
     cubes[i].push(column);
-    for (let k = cubeCount - 1; k >= 0; k--) {
+    for (let k = z - 1; k >= 0; k--) {
       //const material = new THREE.MeshBasicMaterial({ color: cubeColor, transparent: false, opacity: 0.5 });
       // const material = new THREE.MeshNormalMaterial();
       const geometry = new THREE.BoxGeometry(cubeSize, cubeSize, cubeSize);
@@ -158,9 +157,9 @@ for (let i = 0; i < cubeCount; i++) {
       const edges = new THREE.EdgesGeometry(geometry);
       const edgesMesh = new THREE.LineSegments(edges, edgeMaterial);
 
-      const positionX = (i - cubeCount / 2) * (cubeSize + spacing) + (cubeSize + spacing) / 2;
-      const positionY = (j - cubeCount / 2) * (cubeSize + spacing) + (cubeSize + spacing) / 2;
-      const positionZ = (k - cubeCount / 2) * (cubeSize + spacing) + (cubeSize + spacing) / 2;
+      const positionX = (i - x / 2) * (cubeSize + spacing) + (cubeSize + spacing) / 2;
+      const positionY = (j - y / 2) * (cubeSize + spacing) + (cubeSize + spacing) / 2;
+      const positionZ = (k - z / 2) * (cubeSize + spacing) + (cubeSize + spacing) / 2;
 
       const adjacentMines = mineSweeper.fields[i][j][k].adjacentMines;
       const isMine = mineSweeper.fields[i][j][k].mine;
@@ -348,9 +347,9 @@ function changeColorOfAdjacentCubes(p: Position, select: boolean) {
 
 function getFieldPosition(v: THREE.Vector3): Position {
   const s = cubeSize + spacing;
-  const x = Math.round(((cubeCount * s) / 2 - (s / 2) + v.x) / s);
-  const y = Math.round(((cubeCount * s) / 2 - (s / 2) + v.y) / s);
-  const z = Math.round(((cubeCount * s) / 2 - (s / 2) + v.z) / s);
-  return { x, y, z };
+  const i = Math.round(((x * s) / 2 - (s / 2) + v.x) / s);
+  const j = Math.round(((y * s) / 2 - (s / 2) + v.y) / s);
+  const k = Math.round(((z * s) / 2 - (s / 2) + v.z) / s);
+  return { x: i, y: j, z: k };
 }
 sceneInit.animate();
