@@ -7,7 +7,7 @@ import { Position } from './types.js';
 const x = 6;
 const y = 6;
 const z = 6;
-const mineSweeper = new MineSweeper3D(x, y, z, 6);
+const mineSweeper = new MineSweeper3D(x, y, z, 8);
 const sceneInit = new SceneInit('container');
 
 // Tamanho e quantidade de cubos menores
@@ -135,6 +135,7 @@ interface Cube {
   selected: boolean;
   mesh: THREE.Mesh<THREE.BoxGeometry>;
   edge: THREE.LineSegments;
+  text?: THREE.Mesh<THREE.CircleGeometry>;
   flagOverlay?: THREE.Mesh<THREE.PlaneGeometry>[];
 }
 
@@ -234,14 +235,22 @@ function leftClickCube(cube: any) { //TODO renderizar números somente quando de
   }
   if (response.gameOver) {
     setTimeout(() => alert(response.gameOver), 10);
-    if (!response.mineFields) return;
-    for (const { x, y, z } of response.mineFields) {
-      if (p.x === x && p.y === y && p.z === z) continue;
+    response.unflaggedMines?.forEach(({ x, y, z }) => {
+      if (p.x === x && p.y === y && p.z === z) return;
       renderMine(x, y, z, false);
       const cubeToRemove = cubes[x][y][z].mesh;
-      if (!cubeToRemove) continue;
+      if (!cubeToRemove) return;
       cubeGroup.remove(cubeToRemove);
-    }
+    });
+    cubes.forEach(line => line.forEach(collumn => collumn.forEach(cube => {
+      cube.mesh.material = materials;
+      if (!cube.text) return;
+      if (!Array.isArray(cube.text.material))
+        cube.text.material.opacity = 0;
+    })));
+    response.wronglyFlaggedFields?.forEach(({ x, y, z }) => {
+      cubes[x][y][z].mesh.material = selectedFlagged;
+    });
   }
 }
 function rightClickCube(renderedCube: any) {
@@ -285,7 +294,7 @@ function rightClickCube(renderedCube: any) {
   }
   else if (status == 'covered') {
     cubes[x][y][z].flagOverlay?.forEach(flag => sceneInit.scene.remove(flag));
-    cubes[x][y][z].flagOverlay = [];
+    cubes[x][y][z].flagOverlay = undefined;
   }
 }
 
@@ -316,6 +325,7 @@ function renderNumberOfAdjacentMines(i: number, j: number, k: number, adjacentMi
 
 let lastIntersectedObject: THREE.Mesh | null = null;
 const opacity = 0.3;
+
 function selectAdjacentCubes(event: MouseEvent) {
   const intersects = sceneInit.getIntersectedObjects(event.clientX, event.clientY);
   for (const mesh of intersects) {
@@ -349,10 +359,14 @@ function selectAdjacentCubes(event: MouseEvent) {
     changeColorOfAdjacentCubes(getFieldPosition(number.position), true);
     //@ts-ignore
     number.material.opacity = opacity;
+    const { x, y, z } = getFieldPosition(number.position);
+    cubes[x][y][z].text = number as THREE.Mesh<THREE.CircleGeometry>;
     //number.scale.multiplyScalar(2);
     lastIntersectedObject = number;
   } else {
     changeColorOfAdjacentCubes(getFieldPosition(number.position), true);
+    const { x, y, z } = getFieldPosition(number.position);
+    cubes[x][y][z].text = number as THREE.Mesh<THREE.CircleGeometry>;
     //@ts-ignore
     number.material.opacity = opacity;
   }
