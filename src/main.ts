@@ -7,7 +7,21 @@ import { Position } from './types.js';
 const x = 6;
 const y = 6;
 const z = 6;
-const mineSweeper = new MineSweeper3D(x, y, z, 8);
+const numberOfMines = 8;
+
+let scoreboard = document.querySelector('#mines');
+if (!scoreboard) scoreboard = document.createElement('div');
+let flaggedFields = 0;
+scoreboard.innerHTML = flaggedFields + ' / ' + numberOfMines;
+
+let clock = document.querySelector('#clock');
+if (!clock) clock = document.createElement('div');
+
+function updateClockCallback(time: number) {
+  clock.innerHTML = '' + time;
+}
+
+const mineSweeper = new MineSweeper3D(x, y, z, numberOfMines, updateClockCallback);
 const sceneInit = new SceneInit('container');
 
 // Tamanho e quantidade de cubos menores
@@ -141,7 +155,6 @@ interface Cube {
 
 const cubes: Cube[][][] = [];
 
-// Crie os cubos menores e adicione-os ao grupo
 for (let i = 0; i < x; i++) {
   const line: Array<any> = [];
   cubes.push(line);
@@ -215,7 +228,7 @@ window.addEventListener('mouseup', event => {
   }
 });
 
-function leftClickCube(cube: any) { //TODO renderizar números somente quando descobertos
+function leftClickCube(cube: any) {
   //reduceCube(cube);
   const p = getFieldPosition(cube.position);
   const response = mineSweeper.clickField(p);
@@ -257,6 +270,8 @@ function rightClickCube(renderedCube: any) {
   const { x, y, z } = getFieldPosition(renderedCube.position);
   const status = mineSweeper.flagAField({ x, y, z });
   if (status == 'flagged') {
+    flaggedFields++;
+    scoreboard.innerHTML = flaggedFields + ' / ' + numberOfMines;
     const textureLoader = new THREE.TextureLoader();
     const texture = textureLoader.load('assets/flag.png');
 
@@ -293,6 +308,8 @@ function rightClickCube(renderedCube: any) {
     cubes[x][y][z].flagOverlay = flagOverlay;
   }
   else if (status == 'covered') {
+    flaggedFields--;
+    scoreboard.innerHTML = flaggedFields + ' / ' + numberOfMines;
     cubes[x][y][z].flagOverlay?.forEach(flag => sceneInit.scene.remove(flag));
     cubes[x][y][z].flagOverlay = undefined;
   }

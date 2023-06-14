@@ -10,10 +10,39 @@
       margin: 0;
       overflow: hidden;
     }
+
+    canvas {
+      z-index: -1;
+    }
+
+    div {
+      padding: 5px;
+      background-color: lightgray;
+      display: inline-block;
+      position: absolute;
+      border-radius: 3px;
+      font-size: 20px;
+    }
+
+    #clock {
+      top: 25px;
+      left: 25px;
+      min-height: 23px;
+      min-width: 36px;
+      display: flex;
+      justify-content: end;
+    }
+
+    #mines {
+      top: 65px;
+      left: 25px;
+    }
   </style>
 </head>
 
 <body>
+  <div id="clock">0</div>
+  <div id="mines"></div>
   <canvas id="container"></canvas>
   <script type="module" src="/src/main.ts"></script>
 </body>

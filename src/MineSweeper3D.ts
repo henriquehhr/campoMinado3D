@@ -8,10 +8,12 @@ export default class MineSweeper3D {
   wronglyFlaggedFields: Position[] = [];
   flaggedMines: Position[] = [];
   coveredSafeFields: number;
+  interval = 0;
+  clock = 0;
   firstClick = true;
   gameOver = false;
 
-  constructor(public readonly x: number, public readonly y: number, public readonly z: number, public readonly numberOfMines: number) {
+  constructor(public readonly x: number, public readonly y: number, public readonly z: number, public readonly numberOfMines: number, public readonly updateClockCallback: (time: number) => void) {
     this.coveredSafeFields = (x * y * z) - numberOfMines;
 
     this.initializeFields();
@@ -100,14 +102,22 @@ export default class MineSweeper3D {
     const response: ClickResponse = {
       fieldsToUncover: []
     };
-    // if (this.firstClick && this.fields[p.x][p.y][p.z].mine)
-    //   this.changePositionOfFirstMine(p);
-    // this.firstClick = false;
     if (this.gameOver)
       return response;
+    if (this.firstClick) {
+      this.interval = setInterval(() => {
+        this.clock++;
+        this.updateClockCallback(this.clock);
+      }, 1000);
+    }
+    // if (this.firstClick && this.fields[p.x][p.y][p.z].mine)
+    //   this.changePositionOfFirstMine(p);
+    this.firstClick = false;
     response.fieldsToUncover = this.uncoverField(p);
-    if (this.coveredSafeFields === 0)
+    if (this.coveredSafeFields === 0) {
       response.gameOver = 'win';
+      clearInterval(this.interval);
+    }
     let gameLoss = false;
     for (const field of response.fieldsToUncover) {
       for (const mine of this.mineFields) {
@@ -119,6 +129,7 @@ export default class MineSweeper3D {
     }
     if (gameLoss) {
       response.gameOver = 'loss';
+      clearInterval(this.interval);
       const unflaggedMines: Position[] = [];
       const flaggedMines: Position[] = [];
       this.mineFields.forEach(({ x, y, z }) => {
