@@ -37,7 +37,8 @@ export default class SceneInit {
     if (!canvas) throw new Error("Canvas not found");
     this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
     this.renderer.setSize(window.innerWidth, window.innerHeight);
-    document.body.appendChild(this.renderer.domElement);
+    this.renderer.setPixelRatio(window.devicePixelRatio);
+    document.body.append(this.renderer.domElement);
 
     this.controls = new TrackballControls(this.camera, this.renderer.domElement);
     this.controls.rotateSpeed = 4;

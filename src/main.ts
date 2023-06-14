@@ -7,7 +7,7 @@ import { Position } from './types.js';
 const x = 6;
 const y = 6;
 const z = 6;
-const mineSweeper = new MineSweeper3D(x, y, z, 12);
+const mineSweeper = new MineSweeper3D(x, y, z, 6);
 const sceneInit = new SceneInit('container');
 
 // Tamanho e quantidade de cubos menores
@@ -135,6 +135,7 @@ interface Cube {
   selected: boolean;
   mesh: THREE.Mesh<THREE.BoxGeometry>;
   edge: THREE.LineSegments;
+  flagOverlay?: THREE.Mesh<THREE.PlaneGeometry>[];
 }
 
 const cubes: Cube[][][] = [];
@@ -243,19 +244,49 @@ function leftClickCube(cube: any) { //TODO renderizar números somente quando de
     }
   }
 }
-function rightClickCube(cube: any) {
-  const p = getFieldPosition(cube.position);
-  const status = mineSweeper.flagAField(p);
-  const selected = cubes[p.x][p.y][p.z].selected;
-  let color;
-  if (status == 'flagged')
-    color = selected ? selectedFlagged : flaggedMaterial;
-  else if (status == 'covered')
-    color = selected ? selectedMaterial : materials;
-  if (status != 'uncovered') {
-    //@ts-ignore
-    cube.material = color;
-  };
+function rightClickCube(renderedCube: any) {
+  const { x, y, z } = getFieldPosition(renderedCube.position);
+  const status = mineSweeper.flagAField({ x, y, z });
+  if (status == 'flagged') {
+    const textureLoader = new THREE.TextureLoader();
+    const texture = textureLoader.load('assets/flag.png');
+
+    const imageMaterial = new THREE.MeshBasicMaterial({
+      map: texture,
+      transparent: true
+    });
+    const faceGeometry = new THREE.PlaneGeometry(cubeSize, cubeSize);
+
+    const flagOverlay = [];
+    for (let i = 0; i < 6; i++) {
+      const faceMesh = new THREE.Mesh(faceGeometry, imageMaterial);
+      flagOverlay.push(faceMesh);
+    }
+
+    const p = renderedCube.position;
+
+    flagOverlay[0].position.set(p.x, p.y + (cubeSize / 2), p.z);
+    flagOverlay[0].rotation.x = (3 * Math.PI) / 2;
+    flagOverlay[1].position.set(p.x, p.y - (cubeSize / 2), p.z);
+    flagOverlay[1].rotation.x = Math.PI / 2;
+    flagOverlay[2].position.set(p.x, p.y, p.z + (cubeSize / 2));
+    flagOverlay[3].position.set(p.x, p.y, p.z - (cubeSize / 2));
+    flagOverlay[3].rotation.x = Math.PI;
+    flagOverlay[4].position.set(p.x - (cubeSize / 2), p.y, p.z);
+    flagOverlay[4].rotation.y = (3 * Math.PI) / 2;
+    flagOverlay[5].position.set(p.x + (cubeSize / 2), p.y, p.z);
+    flagOverlay[5].rotation.y = Math.PI / 2;
+
+    flagOverlay.forEach(faceMesh => {
+      sceneInit.scene.add(faceMesh);
+    });
+
+    cubes[x][y][z].flagOverlay = flagOverlay;
+  }
+  else if (status == 'covered') {
+    cubes[x][y][z].flagOverlay?.forEach(flag => sceneInit.scene.remove(flag));
+    cubes[x][y][z].flagOverlay = [];
+  }
 }
 
 function renderMine(i: number, j: number, k: number, revelead: boolean) {
@@ -332,10 +363,7 @@ function changeColorOfAdjacentCubes(p: Position, select: boolean) {
     if (!cubes[p.x + a.x]) continue;
     if (!cubes[p.x + a.x][p.y + a.y]) continue;
     if (!cubes[p.x + a.x][p.y + a.y][p.z + a.z]) continue;
-    const color = mineSweeper.fields[p.x + a.x][p.y + a.y][p.z + a.z].status == 'flagged' ? flaggedMaterial : materials;
-    const alternativeColor = mineSweeper.fields[p.x + a.x][p.y + a.y][p.z + a.z].status == 'flagged' ? selectedFlagged : selectedMaterial;
-    //@ts-ignore
-    cubes[p.x + a.x][p.y + a.y][p.z + a.z].mesh.material = (select ? alternativeColor : color);
+    cubes[p.x + a.x][p.y + a.y][p.z + a.z].mesh.material = (select ? selectedMaterial : materials);
     cubes[p.x + a.x][p.y + a.y][p.z + a.z].selected = select;
   }
 }
