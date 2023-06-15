@@ -37,12 +37,32 @@
       top: 65px;
       left: 25px;
     }
+
+    #menu {
+      top: 105px;
+      left: 25px;
+      font-size: 17px;
+    }
+
+    input {
+      margin-bottom: 10px;
+    }
+
+    button {
+      font-size: 16px;
+    }
   </style>
 </head>
 
 <body>
   <div id="clock">0</div>
   <div id="mines"></div>
+  <div id="menu">
+    <label><input type="radio" name="difficulty" value="beginner" checked>Beginner</label><br>
+    <label><input type="radio" name="difficulty" value="intermediate">Intermediate</label><br>
+    <label><input type="radio" name="difficulty" value="expert">Expert</label><br>
+    <button onclick="window.location.reload();">New game</button>
+  </div>
   <canvas id="container"></canvas>
   <script type="module" src="/src/main.ts"></script>
 </body>

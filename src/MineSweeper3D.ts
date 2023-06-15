@@ -9,7 +9,7 @@ export default class MineSweeper3D {
   flaggedMines: Position[] = [];
   coveredSafeFields: number;
   interval = 0;
-  clock = 0;
+  time = 0;
   firstClick = true;
   gameOver = false;
 
@@ -106,8 +106,8 @@ export default class MineSweeper3D {
       return response;
     if (this.firstClick) {
       this.interval = setInterval(() => {
-        this.clock++;
-        this.updateClockCallback(this.clock);
+        this.time++;
+        this.updateClockCallback(this.time);
       }, 1000);
     }
     // if (this.firstClick && this.fields[p.x][p.y][p.z].mine)

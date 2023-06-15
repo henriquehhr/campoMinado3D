@@ -10,7 +10,8 @@ const z = 6;
 const numberOfMines = 8;
 
 let scoreboard = document.querySelector('#mines');
-if (!scoreboard) scoreboard = document.createElement('div');
+if (!scoreboard)
+  scoreboard = document.createElement('div');
 let flaggedFields = 0;
 scoreboard.innerHTML = flaggedFields + ' / ' + numberOfMines;
 
@@ -18,6 +19,7 @@ let clock = document.querySelector('#clock');
 if (!clock) clock = document.createElement('div');
 
 function updateClockCallback(time: number) {
+  if (!clock) return;
   clock.innerHTML = '' + time;
 }
 
@@ -78,12 +80,6 @@ const selectedFlagged = [
   new THREE.MeshBasicMaterial({ color: 0xb55651 }),
 ];
 
-
-// const cubeColor = 0x006655;
-// const alternativeCubeColor = 0x005040;
-// const flaggedCubeColor = 0xF73970;
-// const alternativeFlaggedColor = 0xDD3050;
-// const selectedCubeColor = 0x224444;
 const edgeColor = 0xFFFFFF;
 
 const adjacentFields: Position[] = [];
@@ -271,6 +267,7 @@ function rightClickCube(renderedCube: any) {
   const status = mineSweeper.flagAField({ x, y, z });
   if (status == 'flagged') {
     flaggedFields++;
+    if (!scoreboard) return;
     scoreboard.innerHTML = flaggedFields + ' / ' + numberOfMines;
     const textureLoader = new THREE.TextureLoader();
     const texture = textureLoader.load('assets/flag.png');
@@ -309,6 +306,7 @@ function rightClickCube(renderedCube: any) {
   }
   else if (status == 'covered') {
     flaggedFields--;
+    if (!scoreboard) return;
     scoreboard.innerHTML = flaggedFields + ' / ' + numberOfMines;
     cubes[x][y][z].flagOverlay?.forEach(flag => sceneInit.scene.remove(flag));
     cubes[x][y][z].flagOverlay = undefined;
