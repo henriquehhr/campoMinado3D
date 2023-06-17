@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import * as TWEEN from '@tweenjs/tween.js';
-import { TrackballControls } from 'three/addons/controls/TrackballControls.js';
+import { TrackballControls } from 'three/examples/jsm/controls/TrackballControls.js';
 import { FontLoader, Font } from 'three/examples/jsm/loaders/FontLoader.js';
 
 export default class SceneInit {
