@@ -1,12 +1,14 @@
 import * as THREE from 'three';
+import { Font } from 'three/examples/jsm/loaders/FontLoader.js';
 
 import SceneInit from './SceneInit.js';
 import MineSweeper3D from './MineSweeper3D.js';
 import CubeUI from './CubeUI.js';
 import NumberUI from './NumberUI.js';
 import MineUI from './MineUI.js';
-import { ClickResponse, Position } from './types.js';
-import { Font } from 'three/examples/jsm/loaders/FontLoader.js';
+import { type ClickResponse, type Position } from './types.js';
+
+import { flaggedFields } from './store.js';
 
 export default class MineSweeperCanvas {
 
@@ -133,12 +135,14 @@ export default class MineSweeperCanvas {
     if (status == 'flagged') {
       this.cubes[x][y][z].cubeUI.flagCube();
       this.cubes[x][y][z].cubeUI.flagOverlay?.forEach(faceMesh => {
-        this.sceneInit.scene.add(faceMesh);
+        this.cubeGroup.add(faceMesh);
       });
+      flaggedFields.increment();
     }
     else if (status == 'covered') {
       this.cubes[x][y][z].cubeUI.flagOverlay?.forEach(flag => this.cubeGroup.remove(flag));
       this.cubes[x][y][z].cubeUI.flagOverlay = undefined;
+      flaggedFields.decrement();
     }
   }
 

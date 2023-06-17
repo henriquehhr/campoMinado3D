@@ -1,4 +1,4 @@
-import { Field, Position, FieldStatus, ClickResponse, FieldToUncover } from "./types";
+import { type Field, type Position, type FieldStatus, type ClickResponse, type FieldToUncover } from "./types";
 import { random } from "./utils";
 
 export default class MineSweeper3D {
