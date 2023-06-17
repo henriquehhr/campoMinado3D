@@ -8,7 +8,7 @@
   export let numberOfMines = 8;
   export let containerID = 'container';
 
-  export let updateClockCallback = (time: number) => {
+  const updateClockCallback = (time: number) => {
     clockTime.set(time);
   };
 
