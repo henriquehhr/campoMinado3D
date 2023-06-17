@@ -34,8 +34,16 @@ export default class CubeUI {
   private static edgesGeometry = new THREE.EdgesGeometry(CubeUI.cubeGeometry);
   private static edgeMaterial = new THREE.LineBasicMaterial({ color: 0xFFFFFF, transparent: false, opacity: 0.1 });
 
+  private static flagImage = new THREE.TextureLoader().load('assets/flag.png');
+  private static flagMaterial = new THREE.MeshBasicMaterial({
+    map: CubeUI.flagImage,
+    transparent: true
+  });
+  private static faceGeometry = new THREE.PlaneGeometry(CubeUI.cubeSize, CubeUI.cubeSize);
+
   cubeMesh: THREE.Mesh<THREE.BoxGeometry, THREE.Material[]>;
   edgesMesh: THREE.LineSegments<THREE.EdgesGeometry, THREE.Material>;
+  flagOverlay?: THREE.Mesh<THREE.PlaneGeometry, THREE.MeshBasicMaterial>[];
 
   constructor(position: THREE.Vector3) {
     this.cubeMesh = new THREE.Mesh(CubeUI.cubeGeometry, CubeUI.materials);
@@ -52,6 +60,26 @@ export default class CubeUI {
       this.cubeMesh.material = CubeUI.selectedMaterial;
     else if (color == 'wronglyFlagged')
       this.cubeMesh.material = CubeUI.wronglyFlaggedMaterial;
+  }
+
+  public flagCube() {
+    this.flagOverlay = [];
+    for (let i = 0; i < 6; i++) {
+      const faceMesh = new THREE.Mesh(CubeUI.faceGeometry, CubeUI.flagMaterial);
+      this.flagOverlay.push(faceMesh);
+    }
+    const p = this.cubeMesh.position;
+    this.flagOverlay[0].position.set(p.x, p.y + (CubeUI.cubeSize / 2), p.z);
+    this.flagOverlay[0].rotation.x = (3 * Math.PI) / 2;
+    this.flagOverlay[1].position.set(p.x, p.y - (CubeUI.cubeSize / 2), p.z);
+    this.flagOverlay[1].rotation.x = Math.PI / 2;
+    this.flagOverlay[2].position.set(p.x, p.y, p.z + (CubeUI.cubeSize / 2));
+    this.flagOverlay[3].position.set(p.x, p.y, p.z - (CubeUI.cubeSize / 2));
+    this.flagOverlay[3].rotation.x = Math.PI;
+    this.flagOverlay[4].position.set(p.x - (CubeUI.cubeSize / 2), p.y, p.z);
+    this.flagOverlay[4].rotation.y = (3 * Math.PI) / 2;
+    this.flagOverlay[5].position.set(p.x + (CubeUI.cubeSize / 2), p.y, p.z);
+    this.flagOverlay[5].rotation.y = Math.PI / 2;
   }
 
 }

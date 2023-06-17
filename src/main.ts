@@ -49,7 +49,6 @@ interface Cube {
   selected: boolean;
   cubeUI: CubeUI;
   numberUI?: NumberUI;
-  flagOverlay?: THREE.Mesh<THREE.PlaneGeometry>[];
 }
 
 const cubes: Cube[][][] = [];
@@ -139,47 +138,17 @@ function rightClickCube(renderedCube: THREE.Mesh<THREE.BoxGeometry, THREE.Materi
     flaggedFields++;
     if (!scoreboard) return;
     scoreboard.innerHTML = flaggedFields + ' / ' + numberOfMines;
-    const textureLoader = new THREE.TextureLoader();
-    const texture = textureLoader.load('assets/flag.png');
-
-    const imageMaterial = new THREE.MeshBasicMaterial({
-      map: texture,
-      transparent: true
-    });
-    const faceGeometry = new THREE.PlaneGeometry(CubeUI.cubeSize, CubeUI.cubeSize);
-
-    const flagOverlay = [];
-    for (let i = 0; i < 6; i++) {
-      const faceMesh = new THREE.Mesh(faceGeometry, imageMaterial);
-      flagOverlay.push(faceMesh);
-    }
-
-    const p = renderedCube.position;
-
-    flagOverlay[0].position.set(p.x, p.y + (CubeUI.cubeSize / 2), p.z);
-    flagOverlay[0].rotation.x = (3 * Math.PI) / 2;
-    flagOverlay[1].position.set(p.x, p.y - (CubeUI.cubeSize / 2), p.z);
-    flagOverlay[1].rotation.x = Math.PI / 2;
-    flagOverlay[2].position.set(p.x, p.y, p.z + (CubeUI.cubeSize / 2));
-    flagOverlay[3].position.set(p.x, p.y, p.z - (CubeUI.cubeSize / 2));
-    flagOverlay[3].rotation.x = Math.PI;
-    flagOverlay[4].position.set(p.x - (CubeUI.cubeSize / 2), p.y, p.z);
-    flagOverlay[4].rotation.y = (3 * Math.PI) / 2;
-    flagOverlay[5].position.set(p.x + (CubeUI.cubeSize / 2), p.y, p.z);
-    flagOverlay[5].rotation.y = Math.PI / 2;
-
-    flagOverlay.forEach(faceMesh => {
+    cubes[x][y][z].cubeUI.flagCube();
+    cubes[x][y][z].cubeUI.flagOverlay?.forEach(faceMesh => {
       sceneInit.scene.add(faceMesh);
     });
-
-    cubes[x][y][z].flagOverlay = flagOverlay;
   }
   else if (status == 'covered') {
     flaggedFields--;
     if (!scoreboard) return;
     scoreboard.innerHTML = flaggedFields + ' / ' + numberOfMines;
-    cubes[x][y][z].flagOverlay?.forEach(flag => sceneInit.scene.remove(flag));
-    cubes[x][y][z].flagOverlay = undefined;
+    cubes[x][y][z].cubeUI.flagOverlay?.forEach(flag => sceneInit.scene.remove(flag));
+    cubes[x][y][z].cubeUI.flagOverlay = undefined;
   }
 }
 
