@@ -5,6 +5,10 @@
   <meta charset="utf-8">
   <title>Campo Minado 3D</title>
   <style>
+    body {
+      background-color: black;
+    }
+
     body,
     canvas {
       margin: 0;
@@ -15,32 +19,31 @@
       z-index: -1;
     }
 
-    div {
+    #overlay {
+      position: absolute;
+      top: 25px;
+      left: 25px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    #overlay div {
       padding: 5px;
       background-color: lightgray;
-      display: inline-block;
-      position: absolute;
       border-radius: 3px;
       font-size: 20px;
+      display: block;
     }
 
     #clock {
-      top: 25px;
-      left: 25px;
       min-height: 23px;
       min-width: 36px;
       display: flex;
       justify-content: end;
     }
 
-    #mines {
-      top: 65px;
-      left: 25px;
-    }
-
     #menu {
-      top: 105px;
-      left: 25px;
       font-size: 17px;
     }
 
@@ -55,13 +58,15 @@
 </head>
 
 <body>
-  <div id="clock">0</div>
-  <div id="mines"></div>
-  <div id="menu">
-    <label><input type="radio" name="difficulty" value="beginner" checked>Beginner</label><br>
-    <label><input type="radio" name="difficulty" value="intermediate">Intermediate</label><br>
-    <label><input type="radio" name="difficulty" value="expert">Expert</label><br>
-    <button onclick="window.location.reload();">New game</button>
+  <div id="overlay">
+    <div id="clock">0</div>
+    <div id="mines"></div>
+    <div id="menu">
+      <label><input type="radio" name="difficulty" value="beginner" checked>Beginner</label><br>
+      <label><input type="radio" name="difficulty" value="intermediate">Intermediate</label><br>
+      <label><input type="radio" name="difficulty" value="expert">Expert</label><br>
+      <button onclick="window.location.reload();">New game</button>
+    </div>
   </div>
   <canvas id="container"></canvas>
   <script type="module" src="/src/main.ts"></script>

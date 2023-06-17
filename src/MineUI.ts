@@ -1,5 +1,4 @@
 import * as THREE from 'three';
-import CubeUI from "./CubeUI";
 
 export default class MineUI {
 
