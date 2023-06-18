@@ -1,25 +1,38 @@
 <script lang="ts">
+  import { onMount, onDestroy } from 'svelte';
   import MineSweeperCanvas from './MineSweeperCanvas';
-  import { clockTime } from './store.js';
+  import { clockTime, flaggedFields } from './store.js';
 
   export let rows = 6;
   export let collumns = 6;
   export let layers = 6;
   export let numberOfMines = 8;
-  export let containerID = 'container';
 
+  let canvas: HTMLElement;
+  let mineSweeperCanvas: MineSweeperCanvas;
   const updateClockCallback = (time: number) => {
     clockTime.set(time);
   };
 
-  const mineSweeperCanvas = new MineSweeperCanvas(
-    rows,
-    collumns,
-    layers,
-    numberOfMines,
-    updateClockCallback,
-    containerID
-  );
-  mineSweeperCanvas.renderCubes();
-  mineSweeperCanvas.addEventListeners();
+  onMount(() => {
+    mineSweeperCanvas = new MineSweeperCanvas(
+      rows,
+      collumns,
+      layers,
+      numberOfMines,
+      updateClockCallback,
+      canvas
+    );
+    mineSweeperCanvas.renderCubes();
+    mineSweeperCanvas.addEventListeners();
+  });
+
+  onDestroy(() => {
+    mineSweeperCanvas.eraseGame();
+    clockTime.set(0);
+    flaggedFields.reset();
+    mineSweeperCanvas = null;
+  });
 </script>
+
+<canvas id="container" bind:this={canvas} />

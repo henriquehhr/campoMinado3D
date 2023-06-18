@@ -22,7 +22,10 @@ export default class SceneInit {
   raycaster: THREE.Raycaster;
   position: THREE.Vector2;
 
-  constructor(canvasID: string) {
+  onWindowResizeCallback = this.onWindowResize.bind(this);
+  reset = false;
+
+  constructor(canvas: HTMLElement) {
     this.scene = new THREE.Scene();
     this.camera = new THREE.PerspectiveCamera(
       this.fov,
@@ -33,7 +36,6 @@ export default class SceneInit {
     this.camera.position.z = 5;
     this.camera.updateProjectionMatrix();
 
-    const canvas = document.getElementById(canvasID);
     if (!canvas) throw new Error("Canvas not found");
     this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
     this.renderer.setSize(window.innerWidth, window.innerHeight);
@@ -46,7 +48,7 @@ export default class SceneInit {
     this.raycaster = new THREE.Raycaster();
     this.position = new THREE.Vector2();
 
-    window.addEventListener('resize', () => this.onWindowResize(), false);
+    window.addEventListener('resize', this.onWindowResizeCallback, false);
 
     // this.startRotationAnimation();
   }
@@ -72,6 +74,7 @@ export default class SceneInit {
   }
 
   public animate() {
+    if (this.reset) return;
     window.requestAnimationFrame(this.animate.bind(this));
     TWEEN.update();
     this.controls.update();
@@ -99,5 +102,42 @@ export default class SceneInit {
     this.camera.aspect = window.innerWidth / window.innerHeight;
     this.camera.updateProjectionMatrix();
     this.renderer.setSize(window.innerWidth, window.innerHeight);
+  }
+
+  public resetScene() {
+    this.reset = true;
+    window.removeEventListener('resize', this.onWindowResizeCallback);
+    this.onWindowResizeCallback = null;
+    console.log('dispose renderer!')
+    this.renderer.dispose()
+
+    this.scene.traverse(object => {
+      const mesh = object as THREE.Mesh;
+      if (!mesh.isMesh) return
+
+      console.log('dispose geometry!')
+      mesh.geometry.dispose()
+
+      if (!Array.isArray(mesh.material)) {
+        cleanMaterial(mesh.material)
+      } else {
+        // an array of materials
+        for (const material of mesh.material) cleanMaterial(material)
+      }
+    })
+
+    function cleanMaterial(material) {
+      console.log('dispose material!')
+      material.dispose()
+
+      // dispose textures
+      for (const key of Object.keys(material)) {
+        const value = material[key]
+        if (value && typeof value === 'object' && 'minFilter' in value) {
+          console.log('dispose texture!')
+          value.dispose()
+        }
+      }
+    }
   }
 }

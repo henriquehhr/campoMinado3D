@@ -235,4 +235,8 @@ export default class MineSweeper3D {
     }
   }
 
+  public clearClock() {
+    clearInterval(this.interval);
+  }
+
 }

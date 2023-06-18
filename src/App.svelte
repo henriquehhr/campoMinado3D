@@ -4,18 +4,48 @@
   import MineCount from './MineCount.svelte';
   import MineSweeperCanvas from './MineSweeperCanvas.svelte';
 
-  let rows = 6;
-  let collumns = 6;
-  let layers = 6;
-  let numberOfMines = 8;
-  let containerID = 'container';
+  let gameconfiguration = {
+    rows: 6,
+    collumns: 6,
+    layers: 6,
+    numberOfMines: 8,
+  };
+
+  function handleNewGame(e: CustomEvent) {
+    const { difficulty } = e.detail;
+    if (difficulty == 'beginner') {
+      gameconfiguration = {
+        rows: 6,
+        collumns: 6,
+        layers: 6,
+        numberOfMines: 8,
+      };
+    } else if (difficulty == 'intermediate') {
+      gameconfiguration = {
+        rows: 8,
+        collumns: 8,
+        layers: 8,
+        numberOfMines: 20,
+      };
+    } else if (difficulty == 'expert') {
+      gameconfiguration = {
+        rows: 10,
+        collumns: 10,
+        layers: 10,
+        numberOfMines: 70,
+      };
+    }
+  }
 </script>
 
-<MineSweeperCanvas {rows} {collumns} {layers} {numberOfMines} {containerID} />
+{#key gameconfiguration}
+  <MineSweeperCanvas {...gameconfiguration} />
+{/key}
+
 <div id="overlay">
   <Clock />
-  <MineCount {numberOfMines} />
-  <Menu />
+  <MineCount numberOfMines={gameconfiguration.numberOfMines} />
+  <Menu on:newGame={handleNewGame} />
 </div>
 
 <style>
@@ -32,7 +62,5 @@
     padding: 5px;
     background-color: lightgray;
     border-radius: 3px;
-    font-size: 20px;
-    display: block;
   }
 </style>
