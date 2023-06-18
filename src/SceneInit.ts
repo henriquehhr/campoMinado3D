@@ -108,14 +108,11 @@ export default class SceneInit {
     this.reset = true;
     window.removeEventListener('resize', this.onWindowResizeCallback);
     this.onWindowResizeCallback = null;
-    console.log('dispose renderer!')
     this.renderer.dispose()
 
     this.scene.traverse(object => {
       const mesh = object as THREE.Mesh;
       if (!mesh.isMesh) return
-
-      console.log('dispose geometry!')
       mesh.geometry.dispose()
 
       if (!Array.isArray(mesh.material)) {
@@ -127,14 +124,12 @@ export default class SceneInit {
     })
 
     function cleanMaterial(material) {
-      console.log('dispose material!')
       material.dispose()
 
       // dispose textures
       for (const key of Object.keys(material)) {
         const value = material[key]
         if (value && typeof value === 'object' && 'minFilter' in value) {
-          console.log('dispose texture!')
           value.dispose()
         }
       }

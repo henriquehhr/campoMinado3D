@@ -36,3 +36,11 @@
 </script>
 
 <canvas id="container" bind:this={canvas} />
+
+<style>
+  canvas {
+    z-index: -1;
+    margin: 0;
+    overflow: hidden;
+  }
+</style>
