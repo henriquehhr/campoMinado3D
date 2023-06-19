@@ -1,5 +1,6 @@
 <script lang="ts">
   import Clock from './Clock.svelte';
+  import GameOverModal from './GameOverModal.svelte';
   import Menu from './Menu.svelte';
   import MineCount from './MineCount.svelte';
   import MineSweeperCanvas from './MineSweeperCanvas.svelte';
@@ -25,6 +26,7 @@
   <MineCount numberOfMines={gameconfiguration.numberOfMines} />
   <Menu on:newGame={handleNewGame} />
 </div>
+<GameOverModal />
 
 <style>
   #overlay {

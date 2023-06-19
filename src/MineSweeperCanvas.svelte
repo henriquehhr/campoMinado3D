@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount, onDestroy } from 'svelte';
   import MineSweeperCanvas from './MineSweeperCanvas';
-  import { clockTime, flaggedFields } from './store.js';
+  import { clockTime, flaggedFields, gameOverStatus } from './store.js';
 
   export let rows = 6;
   export let collumns = 6;
@@ -31,6 +31,7 @@
     mineSweeperCanvas.eraseGame();
     clockTime.set(0);
     flaggedFields.reset();
+    gameOverStatus.reset();
     mineSweeperCanvas = null;
   });
 </script>

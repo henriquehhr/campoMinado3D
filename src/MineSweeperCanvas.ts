@@ -8,7 +8,7 @@ import NumberUI from './NumberUI.js';
 import MineUI from './MineUI.js';
 import { type ClickResponse, type Position } from './types.js';
 
-import { flaggedFields } from './store.js';
+import { flaggedFields, gameOverStatus } from './store.js';
 
 export default class MineSweeperCanvas {
 
@@ -175,7 +175,7 @@ export default class MineSweeperCanvas {
   }
 
   private gameOver(response: ClickResponse, p: Position) {
-    setTimeout(() => alert(response.gameOver), 10);
+    gameOverStatus.set(response.gameOver);
     response.unflaggedMines?.forEach(({ x, y, z }) => {
       if (p.x === x && p.y === y && p.z === z) return;
       this.renderMine(x, y, z, false);
