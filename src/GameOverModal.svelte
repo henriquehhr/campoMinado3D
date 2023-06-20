@@ -1,6 +1,8 @@
 <script lang="ts">
+  import Scoreboard from './Scoreboard.svelte';
   import { gameOverStatus } from './store.js';
 
+  export let difficulty: string;
   let dialog: HTMLDialogElement;
 
   $: if ($gameOverStatus) {
@@ -22,6 +24,10 @@
 
 <dialog bind:this={dialog} on:click={closeOnOutsideClick}>
   <div>{$gameOverStatus}</div>
+  {#if $gameOverStatus == 'win'}
+    <Scoreboard {difficulty} />
+  {/if}
+  <button on:click={() => dialog.close()}>Close</button>
 </dialog>
 
 <style>

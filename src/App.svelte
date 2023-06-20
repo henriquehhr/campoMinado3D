@@ -5,12 +5,38 @@
   import MineCount from './MineCount.svelte';
   import MineSweeperCanvas from './MineSweeperCanvas.svelte';
 
-  let gameconfiguration = {
-    rows: 8,
-    collumns: 8,
-    layers: 2,
-    numberOfMines: 10,
-  };
+  const difficulties = [
+    {
+      name: 'Begginer',
+      rows: 5,
+      collumns: 5,
+      layers: 5,
+      numberOfMines: 5,
+    },
+    {
+      name: 'Intermediate',
+      rows: 6,
+      collumns: 6,
+      layers: 6,
+      numberOfMines: 12,
+    },
+    {
+      name: 'Expert',
+      rows: 8,
+      collumns: 8,
+      layers: 6,
+      numberOfMines: 25,
+    },
+    {
+      name: 'Custom',
+      rows: 5,
+      collumns: 5,
+      layers: 5,
+      numberOfMines: 1,
+    },
+  ];
+
+  let gameconfiguration = difficulties[0];
 
   function handleNewGame(e: CustomEvent) {
     gameconfiguration = e.detail.chosenDifficulty;
@@ -24,9 +50,9 @@
 <div id="overlay">
   <Clock />
   <MineCount numberOfMines={gameconfiguration.numberOfMines} />
-  <Menu on:newGame={handleNewGame} />
+  <Menu on:newGame={handleNewGame} {difficulties} />
 </div>
-<GameOverModal />
+<GameOverModal difficulty={gameconfiguration.name} />
 
 <style>
   #overlay {
@@ -38,7 +64,7 @@
     gap: 10px;
   }
 
-  #overlay :global(div) {
+  #overlay :global(> div) {
     padding: 5px;
     background-color: lightgray;
     border-radius: 3px;

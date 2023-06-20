@@ -1,36 +1,16 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
 
-  const difficulties = [
-    {
-      name: 'Begginer',
-      rows: 6,
-      collumns: 6,
-      layers: 2,
-      numberOfMines: 8,
-    },
-    {
-      name: 'Intermediate',
-      rows: 6,
-      collumns: 6,
-      layers: 6,
-      numberOfMines: 20,
-    },
-    {
-      name: 'Expert',
-      rows: 6,
-      collumns: 8,
-      layers: 6,
-      numberOfMines: 30,
-    },
-    {
-      name: 'Custom',
-      rows: 5,
-      collumns: 5,
-      layers: 5,
-      numberOfMines: 5,
-    },
-  ];
+  interface Difficulty {
+    name: string;
+    rows: number;
+    collumns: number;
+    layers: number;
+    numberOfMines: number;
+  }
+
+  export let difficulties: Difficulty[];
+
   let chosenDifficulty = difficulties[0];
   let disabled = false;
 
@@ -41,7 +21,7 @@
     });
   }
 
-  function validateCustomGameConfiguration(difficulty): boolean {
+  function validateCustomGameConfiguration(difficulty: Difficulty): boolean {
     if (difficulty.name !== 'Custom') return false;
     if (difficulty.rows < 1) return true;
     if (difficulty.collumns < 1) return true;
@@ -97,6 +77,8 @@
           required /></label>
     {/if}
     <button type="submit" {disabled}>New game</button>
+    <div class="dash" />
+    <label><input type="checkbox" /> Animations</label>
   </form>
 </div>
 
@@ -114,5 +96,11 @@
 
   input:invalid {
     color: red;
+  }
+
+  .dash {
+    height: 0px;
+    border: 1px solid black;
+    margin: 8px 5px 5px 5px;
   }
 </style>
