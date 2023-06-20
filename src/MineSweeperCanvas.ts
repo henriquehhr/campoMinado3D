@@ -25,7 +25,7 @@ export default class MineSweeperCanvas {
   lastIntersectedObject: THREE.Mesh<THREE.CircleGeometry, THREE.Material> | null = null;
   adjacentFields: Position[] = [];
 
-  selectAdjacentCubesCallback = this.selectAdjacentCubes.bind(this);
+  selectAdjacentCubesCallback;
   keydownCallback;
   keyupCallback;
   mousedownCallback;
@@ -67,7 +67,7 @@ export default class MineSweeperCanvas {
   }
 
   public addEventListeners() {
-
+    this.selectAdjacentCubesCallback = this.selectAdjacentCubes.bind(this);
     this.keydownCallback = (function (event) {
       if (event.ctrlKey) {
         this.canvas.addEventListener("mousemove", this.selectAdjacentCubesCallback, false);
@@ -98,8 +98,8 @@ export default class MineSweeperCanvas {
         this.leftClickCube(cube);
       }
     }).bind(this);
-    this.canvas.addEventListener("keydown", this.keydownCallback);
-    this.canvas.addEventListener("keyup", this.keyupCallback);
+    window.addEventListener("keydown", this.keydownCallback);
+    window.addEventListener("keyup", this.keyupCallback);
     this.canvas.addEventListener('mousedown', this.mousedownCallback);
     this.canvas.addEventListener('mousemove', this.mousemoveCallback);
     this.canvas.addEventListener('mouseup', this.mouseupCallback);
@@ -261,8 +261,8 @@ export default class MineSweeperCanvas {
 
   public eraseGame() {
     this.mineSweeper.clearClock();
-    this.canvas.removeEventListener('keydown', this.keydownCallback);
-    this.canvas.removeEventListener('keyup', this.keyupCallback);
+    window.removeEventListener('keydown', this.keydownCallback);
+    window.removeEventListener('keyup', this.keyupCallback);
     this.canvas.removeEventListener('mousedown', this.mousedownCallback);
     this.canvas.removeEventListener('mouseup', this.mouseupCallback);
     this.canvas.removeEventListener('mousemove', this.mousemoveCallback);
