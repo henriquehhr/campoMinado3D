@@ -18,7 +18,8 @@ export default class MineSweeperCanvas {
   sceneInit: SceneInit;
 
   isDragging = 0;
-  ctrlPressed = false;
+  mouseX = 0;
+  mouseY = 0;
 
   font: Promise<Font>;
 
@@ -63,15 +64,14 @@ export default class MineSweeperCanvas {
 
   public addEventListeners() {
     const keydownCallback = (function (this: MineSweeperCanvas, event: KeyboardEvent) {
-      if (event.ctrlKey) {
+      if (event.key === 'Control') {
         this.canvas.addEventListener("mousemove", this.selectAdjacentCubesCallback, false);
-        this.ctrlPressed = true;
       }
     }).bind(this);
-    const keyupCallback = (function (this: MineSweeperCanvas) {
-      if (!this.ctrlPressed) return;
+    const keyupCallback = (function (this: MineSweeperCanvas, event: KeyboardEvent) {
+      if (event.key !== 'Control') return;
       this.canvas.removeEventListener("mousemove", this.selectAdjacentCubesCallback, false);
-      this.ctrlPressed = false;
+      this.uncoverAdjacentCubes();
     }).bind(this);
     const mousedownCallback = (function (this: MineSweeperCanvas) { this.isDragging = 0 }).bind(this);
     const mousemoveCallback = (function (this: MineSweeperCanvas) { this.isDragging++ }).bind(this);
@@ -193,6 +193,8 @@ export default class MineSweeperCanvas {
   }
 
   private selectAdjacentCubes(event: MouseEvent) {
+    this.mouseX = event.clientX;
+    this.mouseY = event.clientY;
     const opacity = 0.3;
     const intersects = this.sceneInit.getIntersectedObjects(event.clientX, event.clientY);
     for (const mesh of intersects) {
@@ -232,8 +234,8 @@ export default class MineSweeperCanvas {
     }
   }
 
-  private uncoverAdjacentCubes(event: MouseEvent) {
-    const intersects = this.sceneInit.getIntersectedObjects(event.clientX, event.clientY);
+  private uncoverAdjacentCubes() {
+    const intersects = this.sceneInit.getIntersectedObjects(this.mouseX, this.mouseY);
     for (const mesh of intersects) {
       if (mesh.object.geometry instanceof THREE.CircleGeometry)
         break;
@@ -301,7 +303,6 @@ export default class MineSweeperCanvas {
     this.cubes = [];
     this.cubeGroup = new THREE.Group();
     this.isDragging = 0;
-    this.ctrlPressed = false;
     this.lastIntersectedObject = null;
   }
 
