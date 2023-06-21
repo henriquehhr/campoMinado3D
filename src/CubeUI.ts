@@ -48,9 +48,9 @@ export default class CubeUI {
   constructor(position: THREE.Vector3) {
     this.cubeMesh = new THREE.Mesh(CubeUI.cubeGeometry, CubeUI.materials);
     this.edgesMesh = new THREE.LineSegments(CubeUI.edgesGeometry, CubeUI.edgeMaterial);
-
     this.edgesMesh.position.copy(position);
     this.cubeMesh.position.copy(position);
+    // this.cubeMesh.matrixAutoUpdate = false;
   }
 
   public changeColor(color: 'normal' | 'selected' | 'wronglyFlagged') {

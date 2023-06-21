@@ -1,13 +1,6 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
-
-  interface Difficulty {
-    name: string;
-    rows: number;
-    collumns: number;
-    layers: number;
-    numberOfMines: number;
-  }
+  import { type Difficulty } from './types';
 
   export let difficulties: Difficulty[];
 
@@ -17,7 +10,7 @@
   const dispatch = createEventDispatcher();
   function newGame() {
     dispatch('newGame', {
-      chosenDifficulty,
+      chosenDifficulty: { ...chosenDifficulty },
     });
   }
 

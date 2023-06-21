@@ -4,6 +4,7 @@
   import Menu from './Menu.svelte';
   import MineCount from './MineCount.svelte';
   import MineSweeperCanvas from './MineSweeperCanvas.svelte';
+  import { clockTime, flaggedFields, gameOverStatus } from './store.js';
 
   const difficulties = [
     {
@@ -39,13 +40,14 @@
   let gameconfiguration = difficulties[0];
 
   function handleNewGame(e: CustomEvent) {
+    clockTime.set(0);
+    flaggedFields.reset();
+    gameOverStatus.reset();
     gameconfiguration = e.detail.chosenDifficulty;
   }
 </script>
 
-{#key gameconfiguration}
-  <MineSweeperCanvas {...gameconfiguration} />
-{/key}
+<MineSweeperCanvas {gameconfiguration} />
 
 <div id="overlay">
   <Clock />

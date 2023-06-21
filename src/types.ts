@@ -21,3 +21,11 @@ export interface ClickResponse {
   flaggedMines?: Position[];
   wronglyFlaggedFields?: Position[];
 }
+
+export interface Difficulty {
+  name: string;
+  rows: number;
+  collumns: number;
+  layers: number;
+  numberOfMines: number;
+}

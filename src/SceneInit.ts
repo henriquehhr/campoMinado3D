@@ -23,7 +23,6 @@ export default class SceneInit {
   position: THREE.Vector2;
 
   onWindowResizeCallback = this.onWindowResize.bind(this);
-  reset = false;
 
   constructor(canvas: HTMLElement) {
     this.scene = new THREE.Scene();
@@ -47,10 +46,11 @@ export default class SceneInit {
     this.quaternion = new THREE.Quaternion();
     this.raycaster = new THREE.Raycaster();
     this.position = new THREE.Vector2();
-
-    window.addEventListener('resize', this.onWindowResizeCallback, false);
-
     // this.startRotationAnimation();
+  }
+
+  public addEventListener() {
+    window.addEventListener('resize', this.onWindowResizeCallback, false);
   }
 
   public loadFont(fontPath: string): Promise<Font> {
@@ -74,9 +74,8 @@ export default class SceneInit {
   }
 
   public animate() {
-    if (this.reset) return;
     window.requestAnimationFrame(this.animate.bind(this));
-    TWEEN.update();
+    // TWEEN.update();
     this.controls.update();
     this.camera.getWorldQuaternion(this.quaternion);
     this.rotateWithCamera.forEach(obj => obj.setRotationFromQuaternion(this.quaternion));
@@ -105,10 +104,14 @@ export default class SceneInit {
   }
 
   public resetScene() {
-    this.reset = true;
-    window.removeEventListener('resize', this.onWindowResizeCallback);
-    this.onWindowResizeCallback = null;
-    this.renderer.dispose()
+    this.rotateWithCamera = [];
+
+    let objectsToRemove: (THREE.Mesh | THREE.LineSegments)[] = [];
+    this.scene.traverse(function (node) {
+      if (node instanceof THREE.Mesh || node instanceof THREE.LineSegments) {
+        objectsToRemove.push(node);
+      }
+    });
 
     this.scene.traverse(object => {
       const mesh = object as THREE.Mesh;
@@ -121,13 +124,19 @@ export default class SceneInit {
         // an array of materials
         for (const material of mesh.material) cleanMaterial(material)
       }
-    })
+    });
 
-    function cleanMaterial(material) {
+    objectsToRemove.forEach(node => {
+      let parent = node.parent;
+      parent?.remove(node);
+    });
+
+    function cleanMaterial(material: THREE.Material) {
       material.dispose()
 
       // dispose textures
       for (const key of Object.keys(material)) {
+        //@ts-ignore
         const value = material[key]
         if (value && typeof value === 'object' && 'minFilter' in value) {
           value.dispose()

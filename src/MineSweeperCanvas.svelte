@@ -1,12 +1,10 @@
 <script lang="ts">
-  import { onMount, onDestroy } from 'svelte';
+  import { onMount } from 'svelte';
   import MineSweeperCanvas from './MineSweeperCanvas';
-  import { clockTime, flaggedFields, gameOverStatus } from './store.js';
+  import { clockTime } from './store.js';
+  import { type Difficulty } from './types';
 
-  export let rows = 6;
-  export let collumns = 6;
-  export let layers = 6;
-  export let numberOfMines = 8;
+  export let gameconfiguration: Difficulty;
 
   let canvas: HTMLElement;
   let mineSweeperCanvas: MineSweeperCanvas;
@@ -15,6 +13,7 @@
   };
 
   onMount(() => {
+    const { rows, collumns, layers, numberOfMines } = gameconfiguration;
     mineSweeperCanvas = new MineSweeperCanvas(
       rows,
       collumns,
@@ -25,15 +24,18 @@
     );
     mineSweeperCanvas.renderCubes();
     mineSweeperCanvas.addEventListeners();
+    mineSweeperCanvas.animate();
   });
 
-  onDestroy(() => {
-    mineSweeperCanvas.eraseGame();
-    clockTime.set(0);
-    flaggedFields.reset();
-    gameOverStatus.reset();
-    mineSweeperCanvas = null;
-  });
+  function resetGame(gameconfiguration: Difficulty) {
+    if (!mineSweeperCanvas) return;
+    const { rows, collumns, layers, numberOfMines } = gameconfiguration;
+    console.log('resetou: ', mineSweeperCanvas);
+    mineSweeperCanvas.newGame(rows, collumns, layers, numberOfMines, updateClockCallback);
+    mineSweeperCanvas.renderCubes();
+  }
+
+  $: resetGame(gameconfiguration);
 </script>
 
 <canvas id="container" bind:this={canvas} />

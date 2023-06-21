@@ -216,9 +216,12 @@ export default class MineSweeper3D {
     return uncoveredFields;
   }
 
-  public selectAdjacentFields(p: Position): Position[] | undefined {
+  public selectAdjacentFields(p: Position): ClickResponse {
+    const response: ClickResponse = {
+      fieldsToUncover: []
+    };
     const field = this.fields[p.x][p.y][p.z];
-    if (field.status == 'uncovered' || field.status == 'flagged') return;
+    if (field.status == 'covered' || field.status == 'flagged') return response;
     let x, y, z, adjacentFlags = 0;
     this.adjacentFields.forEach(adjacent => {
       x = p.x + adjacent.x;
@@ -231,8 +234,40 @@ export default class MineSweeper3D {
         adjacentFlags++;
     });
     if (adjacentFlags == field.adjacentMines) {
-      return this.uncoverAdjacentFields(p);
+      response.fieldsToUncover = this.uncoverAdjacentFields(p);
     }
+    if (this.coveredSafeFields === 0) {
+      response.gameOver = 'win';
+      clearInterval(this.interval);
+    }
+    let gameLoss = false;
+    for (const field of response.fieldsToUncover) {
+      for (const mine of this.mineFields) {
+        if (field.x == mine.x && field.y == mine.y && field.z == mine.z) {
+          gameLoss = true;
+          break;
+        }
+      }
+    }
+    if (gameLoss) {
+      response.gameOver = 'loss';
+      clearInterval(this.interval);
+      const unflaggedMines: Position[] = [];
+      const flaggedMines: Position[] = [];
+      this.mineFields.forEach(({ x, y, z }) => {
+        if (this.fields[x][y][z].status === 'flagged')
+          flaggedMines.push({ x, y, z });
+        else
+          unflaggedMines.push({ x, y, z });
+      });
+
+      response.unflaggedMines = unflaggedMines;
+      response.flaggedMines = flaggedMines;
+      response.wronglyFlaggedFields = this.wronglyFlaggedFields;
+    }
+    if (response.gameOver)
+      this.gameOver = true;
+    return response;
   }
 
   public clearClock() {

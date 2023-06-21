@@ -25,17 +25,18 @@ export default class MineSweeperCanvas {
   lastIntersectedObject: THREE.Mesh<THREE.CircleGeometry, THREE.Material> | null = null;
   adjacentFields: Position[] = [];
 
-  selectAdjacentCubesCallback;
-  keydownCallback;
-  keyupCallback;
-  mousedownCallback;
-  mouseupCallback;
-  mousemoveCallback;
+  selectAdjacentCubesCallback = this.selectAdjacentCubes.bind(this);
+  keydownCallback: ((event: KeyboardEvent) => void) | undefined;
+  keyupCallback: ((event: KeyboardEvent) => void) | undefined;
+  mousedownCallback: (() => void) | undefined;
+  mouseupCallback: ((event: MouseEvent) => void) | undefined;
+  mousemoveCallback: (() => void) | undefined;
 
   constructor(private rows: number, private collumns: number, private layers: number, numberOfMines: number, updateClockCallback: (time: number) => void, private canvas: HTMLElement) {
 
     this.mineSweeper = new MineSweeper3D(rows, collumns, layers, numberOfMines, updateClockCallback);
     this.sceneInit = new SceneInit(canvas);
+    this.sceneInit.addEventListener();
     const fontPath = 'assets/helvetiker_regular.typeface.json';
     this.font = this.sceneInit.loadFont(fontPath);
     this.calculateAdjacentCubes();
@@ -63,25 +64,23 @@ export default class MineSweeperCanvas {
 
     await this.font;
     this.sceneInit.scene.add(this.cubeGroup);
-    this.sceneInit.animate();
   }
 
   public addEventListeners() {
-    this.selectAdjacentCubesCallback = this.selectAdjacentCubes.bind(this);
-    this.keydownCallback = (function (event) {
+    this.keydownCallback = (function (this: MineSweeperCanvas, event: KeyboardEvent) {
       if (event.ctrlKey) {
         this.canvas.addEventListener("mousemove", this.selectAdjacentCubesCallback, false);
         this.ctrlPressed = true;
       }
     }).bind(this);
-    this.keyupCallback = (function () {
+    this.keyupCallback = (function (this: MineSweeperCanvas) {
       if (!this.ctrlPressed) return;
       this.canvas.removeEventListener("mousemove", this.selectAdjacentCubesCallback, false);
       this.ctrlPressed = false;
     }).bind(this);
-    this.mousedownCallback = (function () { this.isDragging = 0 }).bind(this);
-    this.mousemoveCallback = (function () { this.isDragging++ }).bind(this);
-    this.mouseupCallback = (function (event) {
+    this.mousedownCallback = (function (this: MineSweeperCanvas) { this.isDragging = 0 }).bind(this);
+    this.mousemoveCallback = (function (this: MineSweeperCanvas) { this.isDragging++ }).bind(this);
+    this.mouseupCallback = (function (this: MineSweeperCanvas, event: MouseEvent) {
       if (this.isDragging > 5) {
         this.isDragging = 0;
         return;
@@ -103,6 +102,10 @@ export default class MineSweeperCanvas {
     this.canvas.addEventListener('mousedown', this.mousedownCallback);
     this.canvas.addEventListener('mousemove', this.mousemoveCallback);
     this.canvas.addEventListener('mouseup', this.mouseupCallback);
+  }
+
+  public animate() {
+    this.sceneInit.animate();
   }
 
   private calculateAdjacentCubes() {
@@ -175,7 +178,7 @@ export default class MineSweeperCanvas {
   }
 
   private gameOver(response: ClickResponse, p: Position) {
-    gameOverStatus.set(response.gameOver);
+    gameOverStatus.set(response.gameOver ?? '');
     response.unflaggedMines?.forEach(({ x, y, z }) => {
       if (p.x === x && p.y === y && p.z === z) return;
       this.renderMine(x, y, z, false);
@@ -259,15 +262,18 @@ export default class MineSweeperCanvas {
     return new THREE.Vector3(positionX, positionY, positionZ);
   }
 
-  public eraseGame() {
+  public newGame(rows: number, collumns: number, layers: number, numberOfMines: number, updateClockCallback: (time: number) => void) {
+    this.rows = rows;
+    this.collumns = collumns;
+    this.layers = layers;
     this.mineSweeper.clearClock();
-    window.removeEventListener('keydown', this.keydownCallback);
-    window.removeEventListener('keyup', this.keyupCallback);
-    this.canvas.removeEventListener('mousedown', this.mousedownCallback);
-    this.canvas.removeEventListener('mouseup', this.mouseupCallback);
-    this.canvas.removeEventListener('mousemove', this.mousemoveCallback);
     this.sceneInit.resetScene();
-    this.sceneInit = null;
+    this.mineSweeper = new MineSweeper3D(rows, collumns, layers, numberOfMines, updateClockCallback);
+    this.cubes = [];
+    this.cubeGroup = new THREE.Group();
+    this.isDragging = 0;
+    this.ctrlPressed = false;
+    this.lastIntersectedObject = null;
   }
 
 }
