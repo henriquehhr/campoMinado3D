@@ -22,12 +22,12 @@ function createFlaggedFields() {
 }
 
 function createGameOver() {
-  const { subscribe, set } = writable(null);
+  const { subscribe, set } = writable('');
 
   return {
     subscribe,
     set: (status: string) => set(status),
-    reset: () => set(null)
+    reset: () => set('')
   };
 }
 

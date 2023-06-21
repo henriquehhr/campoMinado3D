@@ -5,7 +5,7 @@
   export let difficulty: string;
   let dialog: HTMLDialogElement;
 
-  $: if ($gameOverStatus) {
+  $: if ($gameOverStatus !== '') {
     dialog.showModal();
   }
 
