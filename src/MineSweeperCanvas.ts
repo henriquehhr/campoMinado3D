@@ -26,11 +26,6 @@ export default class MineSweeperCanvas {
   adjacentFields: Position[] = [];
 
   selectAdjacentCubesCallback = this.selectAdjacentCubes.bind(this);
-  keydownCallback: ((event: KeyboardEvent) => void) | undefined;
-  keyupCallback: ((event: KeyboardEvent) => void) | undefined;
-  mousedownCallback: (() => void) | undefined;
-  mouseupCallback: ((event: MouseEvent) => void) | undefined;
-  mousemoveCallback: (() => void) | undefined;
 
   constructor(private rows: number, private collumns: number, private layers: number, numberOfMines: number, updateClockCallback: (time: number) => void, private canvas: HTMLElement) {
 
@@ -67,20 +62,20 @@ export default class MineSweeperCanvas {
   }
 
   public addEventListeners() {
-    this.keydownCallback = (function (this: MineSweeperCanvas, event: KeyboardEvent) {
+    const keydownCallback = (function (this: MineSweeperCanvas, event: KeyboardEvent) {
       if (event.ctrlKey) {
         this.canvas.addEventListener("mousemove", this.selectAdjacentCubesCallback, false);
         this.ctrlPressed = true;
       }
     }).bind(this);
-    this.keyupCallback = (function (this: MineSweeperCanvas) {
+    const keyupCallback = (function (this: MineSweeperCanvas) {
       if (!this.ctrlPressed) return;
       this.canvas.removeEventListener("mousemove", this.selectAdjacentCubesCallback, false);
       this.ctrlPressed = false;
     }).bind(this);
-    this.mousedownCallback = (function (this: MineSweeperCanvas) { this.isDragging = 0 }).bind(this);
-    this.mousemoveCallback = (function (this: MineSweeperCanvas) { this.isDragging++ }).bind(this);
-    this.mouseupCallback = (function (this: MineSweeperCanvas, event: MouseEvent) {
+    const mousedownCallback = (function (this: MineSweeperCanvas) { this.isDragging = 0 }).bind(this);
+    const mousemoveCallback = (function (this: MineSweeperCanvas) { this.isDragging++ }).bind(this);
+    const mouseupCallback = (function (this: MineSweeperCanvas, event: MouseEvent) {
       if (this.isDragging > 5) {
         this.isDragging = 0;
         return;
@@ -97,11 +92,11 @@ export default class MineSweeperCanvas {
         this.leftClickCube(cube);
       }
     }).bind(this);
-    window.addEventListener("keydown", this.keydownCallback);
-    window.addEventListener("keyup", this.keyupCallback);
-    this.canvas.addEventListener('mousedown', this.mousedownCallback);
-    this.canvas.addEventListener('mousemove', this.mousemoveCallback);
-    this.canvas.addEventListener('mouseup', this.mouseupCallback);
+    window.addEventListener("keydown", keydownCallback);
+    window.addEventListener("keyup", keyupCallback);
+    this.canvas.addEventListener('mousedown', mousedownCallback);
+    this.canvas.addEventListener('mousemove', mousemoveCallback);
+    this.canvas.addEventListener('mouseup', mouseupCallback);
   }
 
   public animate() {
