@@ -6,9 +6,9 @@
 
 <style>
   div {
-    min-height: 23px;
     min-width: 36px;
     display: flex;
     justify-content: end;
+    width: min-content;
   }
 </style>

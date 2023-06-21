@@ -118,9 +118,8 @@ export default class MineSweeperCanvas {
     const p = this.getFieldPosition(cube.position);
     const response = this.mineSweeper.clickField(p);
     const positionsToUncover = response.fieldsToUncover;
-    if (positionsToUncover?.length == 0) return;
+    if (positionsToUncover.length == 0) return;
     this.cubeGroup.remove(cube);
-    if (!positionsToUncover) return;
     for (const { x, y, z, adjacentMines, mine } of positionsToUncover) {
       if (mine)
         this.renderMine(x, y, z, true);
@@ -178,8 +177,10 @@ export default class MineSweeperCanvas {
       if (p.x === x && p.y === y && p.z === z) return;
       this.renderMine(x, y, z, false);
       const cubeToRemove = this.cubes[x][y][z].cubeUI.cubeMesh;
+      const edgeToRemove = this.cubes[x][y][z].cubeUI.edgesMesh;
       if (!cubeToRemove) return;
       this.cubeGroup.remove(cubeToRemove);
+      this.cubeGroup.remove(edgeToRemove);
     });
     this.cubes.forEach(line => line.forEach(collumn => collumn.forEach(cube => {
       cube.cubeUI.changeColor('normal');
@@ -228,6 +229,39 @@ export default class MineSweeperCanvas {
       this.changeColorOfAdjacentCubes(this.getFieldPosition(number.position), true);
       const { x, y, z } = this.getFieldPosition(number.position);
       this.cubes[x][y][z].numberUI?.selectNumber(true);
+    }
+  }
+
+  private uncoverAdjacentCubes(event: MouseEvent) {
+    const intersects = this.sceneInit.getIntersectedObjects(event.clientX, event.clientY);
+    for (const mesh of intersects) {
+      if (mesh.object.geometry instanceof THREE.CircleGeometry)
+        break;
+      if (mesh.object.geometry instanceof THREE.BoxGeometry) {
+        return;
+      }
+    }
+    const { object } = intersects.find(shape => shape.object.geometry instanceof THREE.CircleGeometry) ?? { object: null };
+    const number = object as THREE.Mesh<THREE.CircleGeometry, THREE.Material>;
+    if (!number) return;
+    const p = this.getFieldPosition(number.position);
+    const response = this.mineSweeper.selectAdjacentFields(p);
+    const positionsToUncover = response.fieldsToUncover;
+    if (positionsToUncover.length == 0) return;
+    for (const { x, y, z, adjacentMines, mine } of positionsToUncover) {
+      if (mine)
+        this.renderMine(x, y, z, true);
+      else
+        this.renderNumberOfAdjacentMines(x, y, z, adjacentMines);
+      const cubeToRemove = this.cubes[x][y][z].cubeUI.cubeMesh;
+      if (!cubeToRemove) continue;
+      this.cubeGroup.remove(cubeToRemove);
+      const edgeToRemove = this.cubes[x][y][z].cubeUI.edgesMesh;
+      if (!edgeToRemove) continue;
+      this.cubeGroup.remove(edgeToRemove);
+    }
+    if (response.gameOver) {
+      this.gameOver(response, p);
     }
   }
 

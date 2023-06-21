@@ -8,4 +8,10 @@
 </div>
 
 <style>
+  div {
+    display: flex;
+    justify-content: end;
+    min-width: 36px;
+    width: min-content;
+  }
 </style>

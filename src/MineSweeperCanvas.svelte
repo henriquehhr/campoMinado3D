@@ -30,7 +30,6 @@
   function resetGame(gameconfiguration: Difficulty) {
     if (!mineSweeperCanvas) return;
     const { rows, collumns, layers, numberOfMines } = gameconfiguration;
-    console.log('resetou: ', mineSweeperCanvas);
     mineSweeperCanvas.newGame(rows, collumns, layers, numberOfMines, updateClockCallback);
     mineSweeperCanvas.renderCubes();
   }
