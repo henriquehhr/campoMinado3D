@@ -1,3 +1,4 @@
+import { Queue } from "./Queue";
 import { type Field, type Position, type FieldStatus, type ClickResponse, type FieldToUncover } from "./types";
 import { random } from "./utils";
 
@@ -113,7 +114,8 @@ export default class MineSweeper3D {
     // if (this.firstClick && this.fields[p.x][p.y][p.z].mine)
     //   this.changePositionOfFirstMine(p);
     this.firstClick = false;
-    response.fieldsToUncover = this.uncoverField(p);
+    //response.fieldsToUncover = this.uncoverField(p);
+    response.fieldsToUncover = this.bfs3d(p);
     if (this.coveredSafeFields === 0) {
       response.gameOver = 'win';
       clearInterval(this.interval);
@@ -214,6 +216,45 @@ export default class MineSweeper3D {
       }
     }
     return uncoveredFields;
+  }
+
+  private bfs3d(p: Position): FieldToUncover[] {
+    const field = this.fields[p.x][p.y][p.z];
+    if (field.status == 'uncovered') return [];
+
+    const queue = new Queue<FieldToUncover>;
+    queue.enqueue({ ...p, ...this.fields[p.x][p.y][p.z] });
+    const visited = new Set<string>();
+    const result: FieldToUncover[] = [];
+
+    while (queue.length > 0) {
+      const currPos = queue.dequeue();
+      const { x, y, z } = currPos;
+      if (!visited.has(`${x}${y}${z}`)) {
+        visited.add(`${x}${y}${z}`);
+        if (this.fields[x][y][z].status == 'flagged') continue;
+        this.fields[x][y][z].status = 'uncovered'
+        if (!this.fields[x][y][z].mine)
+          this.coveredSafeFields--;
+        result.push(currPos);
+        if (this.fields[x][y][z].adjacentMines > 0) continue;
+        for (const neighbor of this.adjacentFields) {
+          const { x: nx, y: ny, z: nz } = neighbor;
+
+          if (
+            !this.fields[x + nx] ||
+            !this.fields[x + nx][y + ny] ||
+            !this.fields[x + nx][y + ny][z + nz] ||
+            visited.has(`${x + nx}${y + ny}${z + nz}`)
+          ) {
+            continue;
+          }
+          queue.enqueue({ x: x + nx, y: y + ny, z: z + nz, ...this.fields[x + nx][y + ny][z + nz] });
+        }
+      }
+    }
+
+    return result;
   }
 
   public selectAdjacentFields(p: Position): ClickResponse {

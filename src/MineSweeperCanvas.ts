@@ -6,7 +6,7 @@ import MineSweeper3D from './MineSweeper3D.js';
 import CubeUI from './CubeUI.js';
 import NumberUI from './NumberUI.js';
 import MineUI from './MineUI.js';
-import { type ClickResponse, type Position } from './types.js';
+import { type ClickResponse, type Position, type FieldToUncover } from './types.js';
 
 import { flaggedFields, gameOverStatus } from './store.js';
 
@@ -191,6 +191,25 @@ export default class MineSweeperCanvas {
       this.cubes[x][y][z].cubeUI.changeColor('wronglyFlagged');
     });
   }
+
+  // private reduceCube(cube: THREE.Object3D) {
+  //   if (!cube) return;
+  //   const initialScale = cube.scale.clone();
+  //   const targetScale = new THREE.Vector3(0, 0, 0);
+  //   const duration = 1; // Duração da animação em segundos
+  //   const interval = 10; // Intervalo entre os frames em milissegundos
+  //   let currentTime = 0;
+  //   const timer = setInterval(function (this: MineSweeperCanvas) {
+  //     currentTime += interval / 1000; // Converter para segundos
+  //     if (currentTime > duration) {
+  //       clearInterval(timer);
+  //       this.cubeGroup.remove(cube);
+  //     } else {
+  //       const t = currentTime / duration;
+  //       cube.scale.lerpVectors(initialScale, targetScale, t);
+  //     }
+  //   }, interval);
+  // }
 
   private selectAdjacentCubes(event: MouseEvent) {
     this.mouseX = event.clientX;
