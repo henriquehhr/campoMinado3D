@@ -120,14 +120,14 @@ export default class MineSweeperCanvas {
     const positionsToUncover = response.fieldsToUncover;
     if (positionsToUncover.length == 0) return;
     this.cubeGroup.remove(cube);
-    for (const { x, y, z, adjacentMines, mine } of positionsToUncover) {
+    for (const { x, y, z, adjacentMines, mine, distance } of positionsToUncover) {
       if (mine)
         this.renderMine(x, y, z, true);
       else
         this.renderNumberOfAdjacentMines(x, y, z, adjacentMines);
       const cubeToRemove = this.cubes[x][y][z].cubeUI.cubeMesh;
       if (!cubeToRemove) continue;
-      this.cubeGroup.remove(cubeToRemove);
+      this.reduceCube(cubeToRemove, distance);
       const edgeToRemove = this.cubes[x][y][z].cubeUI.edgesMesh;
       if (!edgeToRemove) continue;
       this.cubeGroup.remove(edgeToRemove);
@@ -192,24 +192,26 @@ export default class MineSweeperCanvas {
     });
   }
 
-  // private reduceCube(cube: THREE.Object3D) {
-  //   if (!cube) return;
-  //   const initialScale = cube.scale.clone();
-  //   const targetScale = new THREE.Vector3(0, 0, 0);
-  //   const duration = 1; // Duração da animação em segundos
-  //   const interval = 10; // Intervalo entre os frames em milissegundos
-  //   let currentTime = 0;
-  //   const timer = setInterval(function (this: MineSweeperCanvas) {
-  //     currentTime += interval / 1000; // Converter para segundos
-  //     if (currentTime > duration) {
-  //       clearInterval(timer);
-  //       this.cubeGroup.remove(cube);
-  //     } else {
-  //       const t = currentTime / duration;
-  //       cube.scale.lerpVectors(initialScale, targetScale, t);
-  //     }
-  //   }, interval);
-  // }
+  private reduceCube(cube: THREE.Object3D, delay: number) {
+    if (!cube) return;
+    setTimeout((() => {
+      const initialScale = cube.scale.clone();
+      const targetScale = new THREE.Vector3(0, 0, 0);
+      const duration = 0.4; // Duração da animação em segundos
+      const interval = 30; // Intervalo entre os frames em milissegundos
+      let currentTime = 0;
+      const timer = setInterval(function (this: MineSweeperCanvas) {
+        currentTime += interval / 1000; // Converter para segundos
+        if (currentTime > duration) {
+          clearInterval(timer);
+          this.cubeGroup.remove(cube);
+        } else {
+          const t = currentTime / duration;
+          cube.scale.lerpVectors(initialScale, targetScale, t);
+        }
+      }, interval);
+    }).bind(this), delay * 300);
+  }
 
   private selectAdjacentCubes(event: MouseEvent) {
     this.mouseX = event.clientX;

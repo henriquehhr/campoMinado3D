@@ -195,9 +195,9 @@ export default class MineSweeper3D {
       this.coveredSafeFields--;
     if (field.adjacentMines === 0) {
       const adjacents = this.uncoverAdjacentFields(p);
-      return [{ ...p, ...field }, ...adjacents];
+      return [{ ...p, ...field, distance: 0 }, ...adjacents];
     }
-    return [{ ...p, ...field }];
+    return [{ ...p, ...field, distance: 0 }];
   }
 
   private uncoverAdjacentFields(p: Position): FieldToUncover[] {
@@ -223,7 +223,7 @@ export default class MineSweeper3D {
     if (field.status == 'uncovered') return [];
 
     const queue = new Queue<FieldToUncover>;
-    queue.enqueue({ ...p, ...this.fields[p.x][p.y][p.z] });
+    queue.enqueue({ ...p, ...this.fields[p.x][p.y][p.z], distance: 0 });
     const visited = new Set<string>();
     const result: FieldToUncover[] = [];
 
@@ -249,7 +249,7 @@ export default class MineSweeper3D {
           ) {
             continue;
           }
-          queue.enqueue({ x: x + nx, y: y + ny, z: z + nz, ...this.fields[x + nx][y + ny][z + nz] });
+          queue.enqueue({ x: x + nx, y: y + ny, z: z + nz, ...this.fields[x + nx][y + ny][z + nz], distance: currPos.distance + 1 });
         }
       }
     }

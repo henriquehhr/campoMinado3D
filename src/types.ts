@@ -12,7 +12,7 @@ export type Field = {
   adjacentMines: number
 }
 
-export type FieldToUncover = Position & Field;
+export type FieldToUncover = Position & Field & { distance: number };
 
 export interface ClickResponse {
   fieldsToUncover: FieldToUncover[];
