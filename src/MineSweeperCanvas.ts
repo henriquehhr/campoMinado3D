@@ -209,7 +209,7 @@ export default class MineSweeperCanvas {
           const t = currentTime / duration;
           cube.scale.lerpVectors(initialScale, targetScale, t);
         }
-      }, interval);
+      }.bind(this), interval);
     }).bind(this), delay * 300);
   }
 
