@@ -237,7 +237,7 @@ export default class MineSweeper3D {
         if (!this.fields[x][y][z].mine)
           this.coveredSafeFields--;
         result.push(currPos);
-        if (this.fields[x][y][z].adjacentMines > 0) continue;
+        if (this.fields[x][y][z].adjacentMines > 0 || this.fields[x][y][z].mine) continue;
         for (const neighbor of this.adjacentFields) {
           const { x: nx, y: ny, z: nz } = neighbor;
 
