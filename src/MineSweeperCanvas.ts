@@ -127,10 +127,9 @@ export default class MineSweeperCanvas {
         this.renderNumberOfAdjacentMines(x, y, z, adjacentMines);
       const cubeToRemove = this.cubes[x][y][z].cubeUI.cubeMesh;
       if (!cubeToRemove) continue;
-      this.reduceCube(cubeToRemove, distance);
       const edgeToRemove = this.cubes[x][y][z].cubeUI.edgesMesh;
       if (!edgeToRemove) continue;
-      this.cubeGroup.remove(edgeToRemove);
+      this.reduceCube(cubeToRemove, edgeToRemove, distance);
     }
     if (response.gameOver) {
       this.gameOver(response, p);
@@ -192,7 +191,7 @@ export default class MineSweeperCanvas {
     });
   }
 
-  private reduceCube(cube: THREE.Object3D, delay: number) {
+  private reduceCube(cube: THREE.Object3D, edge: THREE.Object3D, delay: number) {
     if (!cube) return;
     setTimeout((() => {
       const initialScale = cube.scale.clone();
@@ -205,9 +204,11 @@ export default class MineSweeperCanvas {
         if (currentTime > duration) {
           clearInterval(timer);
           this.cubeGroup.remove(cube);
+          this.cubeGroup.remove(edge);
         } else {
           const t = currentTime / duration;
           cube.scale.lerpVectors(initialScale, targetScale, t);
+          edge.scale.lerpVectors(initialScale, targetScale, t);
         }
       }.bind(this), interval);
     }).bind(this), delay * 300);
