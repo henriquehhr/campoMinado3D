@@ -40,6 +40,7 @@ function createRenderer() {
     value() {
       let valor: string;
       this.subscribe((x: string) => valor = x)
+      //@ts-ignore
       return valor;
     }
   };
