@@ -2,12 +2,14 @@ import * as THREE from 'three';
 import * as TWEEN from '@tweenjs/tween.js';
 import { TrackballControls } from 'three/examples/jsm/controls/TrackballControls.js';
 import { FontLoader, Font } from 'three/examples/jsm/loaders/FontLoader.js';
+import WebGPURenderer from 'three/examples/jsm/renderers/webgpu/WebGPURenderer.js';
+import { renderer } from './store.js';
 
 export default class SceneInit {
   // NOTE: Core components to initialize Three.js app.
   scene: THREE.Scene;
   camera: THREE.PerspectiveCamera;
-  renderer: THREE.WebGLRenderer;
+  renderer: THREE.WebGLRenderer | WebGPURenderer;
 
   // NOTE: Camera params;
   fov = 65;
@@ -36,7 +38,10 @@ export default class SceneInit {
     this.camera.updateProjectionMatrix();
 
     if (!canvas) throw new Error("Canvas not found");
-    this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+    if (renderer.value() == 'WebGPU')
+      this.renderer = new WebGPURenderer({ canvas, antialias: true });
+    else
+      this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
     this.renderer.setSize(window.innerWidth, window.innerHeight);
     this.renderer.setPixelRatio(window.devicePixelRatio);
     document.body.append(this.renderer.domElement);

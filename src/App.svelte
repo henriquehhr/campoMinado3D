@@ -4,7 +4,8 @@
   import Menu from './Menu.svelte';
   import MineCount from './MineCount.svelte';
   import MineSweeperCanvas from './MineSweeperCanvas.svelte';
-  import { clockTime, flaggedFields, gameOverStatus } from './store.js';
+  import RendererPicker from './RendererPicker.svelte';
+  import { clockTime, flaggedFields, gameOverStatus, renderer } from './store.js';
 
   const difficulties = [
     {
@@ -38,6 +39,7 @@
   ];
 
   let gameconfiguration = difficulties[0];
+  let startGame: 'WebGPU' | 'WebGL;';
 
   function handleNewGame(e: CustomEvent) {
     clockTime.set(0);
@@ -45,14 +47,22 @@
     gameOverStatus.reset();
     gameconfiguration = e.detail.chosenDifficulty;
   }
+
+  function handleStartGame(e: CustomEvent) {
+    startGame = e.detail.renderer;
+    renderer.set(e.detail.renderer);
+  }
 </script>
 
-<MineSweeperCanvas {gameconfiguration} />
+{#if startGame}
+  <MineSweeperCanvas {gameconfiguration} />
+{/if}
 
 <div id="overlay">
   <Clock />
   <MineCount numberOfMines={gameconfiguration.numberOfMines} />
   <Menu on:newGame={handleNewGame} {difficulties} />
+  <RendererPicker on:startGame={handleStartGame} />
 </div>
 <GameOverModal difficulty={gameconfiguration.name} />
 
