@@ -42,7 +42,6 @@
 <style>
   canvas {
     z-index: -1;
-    margin: 0;
-    overflow: hidden;
+    display: block;
   }
 </style>
