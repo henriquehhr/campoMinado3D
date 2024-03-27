@@ -6,7 +6,7 @@
 
   export let gameconfiguration: Difficulty;
 
-  let canvas: HTMLElement;
+  let canvas: HTMLCanvasElement;
   let mineSweeperCanvas: MineSweeperCanvas;
   const updateClockCallback = (time: number) => {
     clockTime.set(time);
@@ -20,7 +20,7 @@
       layers,
       numberOfMines,
       updateClockCallback,
-      canvas
+      canvas,
     );
     mineSweeperCanvas.renderCubes();
     mineSweeperCanvas.addEventListeners();

@@ -28,7 +28,10 @@ export default class MineSweeperCanvas {
 
   selectAdjacentCubesCallback = this.selectAdjacentCubes.bind(this);
 
-  constructor(private rows: number, private collumns: number, private layers: number, numberOfMines: number, updateClockCallback: (time: number) => void, private canvas: HTMLElement) {
+  constructor(
+    private rows: number, private collumns: number, private layers: number, numberOfMines: number,
+    updateClockCallback: (time: number) => void, private canvas: HTMLCanvasElement
+  ) {
 
     this.mineSweeper = new MineSweeper3D(rows, collumns, layers, numberOfMines, updateClockCallback);
     this.sceneInit = new SceneInit(canvas);
