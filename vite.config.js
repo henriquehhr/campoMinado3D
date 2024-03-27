@@ -3,12 +3,15 @@ import { svelte } from '@sveltejs/vite-plugin-svelte';
 
 export default defineConfig({
   build: {
-    target: 'esnext'
+    target: "es2022"
   },
   esbuild: {
-    supported: {
-      'top-level-await': true
-    },
+    target: "es2022"
+  },
+  optimizeDeps: {
+    esbuildOptions: {
+      target: "es2022",
+    }
   },
   plugins: [svelte()],
 });
