@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { Font } from 'three/examples/jsm/loaders/FontLoader.js';
+import { Font } from 'three/addons/loaders/FontLoader.js';
 
 export default class NumberUI {
   public static fontPath = 'assets/helvetiker_regular.typeface.json';

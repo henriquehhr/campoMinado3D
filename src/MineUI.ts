@@ -18,4 +18,5 @@ export default class MineUI {
     this.circleMesh = new THREE.Mesh(MineUI.circleGeometry, circleMaterial);
     this.circleMesh.position.copy(position);
   }
+
 }
