@@ -1,6 +1,6 @@
 <script lang="ts">
   import Scoreboard from './Scoreboard.svelte';
-  import { gameOverStatus } from './store.js';
+  import { gameOverStatus } from '../store.js';
 
   export let difficulty: string;
   let dialog: HTMLDialogElement;

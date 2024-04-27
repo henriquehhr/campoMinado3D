@@ -2,13 +2,13 @@ import * as THREE from 'three';
 import { Font } from 'three/addons/loaders/FontLoader.js';
 
 import SceneInit from './SceneInit.js';
-import MineSweeper3D from './MineSweeper3D.js';
+import MineSweeper3D from '../MineSweeper3D.js';
 import CubeUI from './CubeUI.js';
 import NumberUI from './NumberUI.js';
 import MineUI from './MineUI.js';
-import { type ClickResponse, type Position, type FieldToUncover } from './types.js';
+import { type ClickResponse, type Position, type FieldToUncover } from '../types.js';
 
-import { flaggedFields, gameOverStatus } from './store.js';
+import { flaggedFields, gameOverStatus } from '../store.js';
 
 export default class MineSweeperCanvas {
 

@@ -1,6 +1,6 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
-  import { type Difficulty } from './types';
+  import { type Difficulty } from '../types';
 
   export let difficulties: Difficulty[];
 
@@ -70,7 +70,7 @@
           required /></label>
     {/if}
     <button type="submit" {disabled}>New game</button>
-    <div class="dash" />
+    <div class="dash"></div>
     <label><input type="checkbox" /> Animations</label>
   </form>
 </div>

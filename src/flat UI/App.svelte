@@ -5,7 +5,7 @@
   import MineCount from './MineCount.svelte';
   import MineSweeperCanvas from './MineSweeperCanvas.svelte';
   import RendererPicker from './RendererPicker.svelte';
-  import { clockTime, flaggedFields, gameOverStatus, renderer } from './store.js';
+  import { clockTime, flaggedFields, gameOverStatus, renderer } from '../store.js';
 
   const difficulties = [
     {

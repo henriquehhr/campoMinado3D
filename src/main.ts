@@ -1,8 +1,9 @@
-import App from './App.svelte'
+import { mount } from 'svelte';
+import App from './flat UI/App.svelte';
 
-const app = new App({
+const app = mount(App, {
   //@ts-ignore
   target: document.getElementById('app'),
-})
+});
 
-export default app
+export default app;

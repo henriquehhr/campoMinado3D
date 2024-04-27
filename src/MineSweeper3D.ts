@@ -1,6 +1,6 @@
-import { Queue } from "./Queue";
+import { Queue } from "./utils/Queue";
 import { type Field, type Position, type FieldStatus, type ClickResponse, type FieldToUncover } from "./types";
-import { random } from "./utils";
+import { random } from "./utils/utils";
 
 export default class MineSweeper3D {
   fields: Field[][][] = [];

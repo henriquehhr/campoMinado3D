@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { clockTime } from './store';
+  import { clockTime } from '../store';
 </script>
 
 <div>{$clockTime}</div>

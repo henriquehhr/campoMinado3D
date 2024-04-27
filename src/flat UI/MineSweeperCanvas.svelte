@@ -1,8 +1,8 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import MineSweeperCanvas from './MineSweeperCanvas';
-  import { clockTime } from './store.js';
-  import { type Difficulty } from './types';
+  import MineSweeperCanvas from '../3D UI/MineSweeperCanvas';
+  import { clockTime } from '../store.js';
+  import { type Difficulty } from '../types';
 
   export let gameconfiguration: Difficulty;
 
@@ -37,7 +37,7 @@
   $: resetGame(gameconfiguration);
 </script>
 
-<canvas id="container" bind:this={canvas} />
+<canvas id="container" bind:this={canvas}></canvas>
 
 <style>
   canvas {

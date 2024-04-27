@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { clockTime } from './store.js';
+  import { clockTime } from '../store.js';
 
   export let difficulty: string;
 
@@ -7,7 +7,7 @@
   let disabled = false;
 
   let scoreBoard: { name: string; difficulty: string; time: number }[] | null = JSON.parse(
-    localStorage.getItem('score') ?? ''
+    localStorage.getItem('score') ?? '',
   );
 
   function saveScore(e: KeyboardEvent) {
