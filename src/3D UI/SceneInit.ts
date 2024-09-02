@@ -2,21 +2,21 @@ import * as THREE from 'three';
 import * as TWEEN from '@tweenjs/tween.js';
 import { TrackballControls } from 'three/addons/controls/TrackballControls.js';
 import { FontLoader, Font } from 'three/addons/loaders/FontLoader.js';
-import WebGPURenderer from 'three/addons/renderers/webgpu/WebGPURenderer.js';
+import WebGPURenderer from 'three/src/renderers/webgpu/WebGPURenderer.js';
 import { renderer } from '../store.js';
 
 export default class SceneInit {
-  // NOTE: Core components to initialize Three.js app.
+  // Core components to initialize Three.js app.
   scene: THREE.Scene;
   camera: THREE.PerspectiveCamera;
   renderer: THREE.WebGLRenderer | WebGPURenderer;
 
-  // NOTE: Camera params;
+  // Camera params;
   fov = 65;
   nearPlane = 0.1;
   farPlane = 1000;
 
-  // NOTE: Additional components.
+  // Additional components.
   controls: TrackballControls;
   quaternion: THREE.Quaternion;
 
